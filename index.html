@@ -16,27 +16,33 @@
     <style>
         /* --- ESTILOS --- */
         :root {
-            --primary: #009B48; --primary-light: #e0f7ea;
-            --danger: #e74c3c; --dark: #1f2937; --gray: #9ca3af;
-            --bg: #f3f4f6; --white: #ffffff;
+            --primary: #009B48; 
+            --primary-light: #e0f7ea;
+            --danger: #e74c3c; 
+            --dark: #1f2937; 
+            --gray: #9ca3af;
+            --bg: #f3f4f6; 
+            --white: #ffffff;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background-color: #e5e5e5; display: flex; justify-content: center; align-items: center; min-height: 100vh; color: var(--dark); margin: 0; }
 
+        /* MARCO MOVIL */
         .mobile-frame { width: 100%; height: 100vh; background: var(--bg); overflow: hidden; position: relative; display: flex; flex-direction: column; }
         @media(min-width: 500px) { .mobile-frame { width: 375px; height: 812px; border-radius: 40px; box-shadow: 0 30px 60px rgba(0,155,72,0.15); border: 8px solid #fff; } }
 
         /* HEADER */
         .header { padding: 40px 25px 15px; display: flex; justify-content: space-between; align-items: center; background: white; z-index: 10; box-shadow: 0 2px 10px rgba(0,0,0,0.03); }
         .header h1 { font-size: 1.3rem; font-weight: 800; margin: 0; }
-        .settings-btn { font-size: 1.5rem; color: var(--dark); cursor: pointer; }
+        .settings-btn { font-size: 1.5rem; color: var(--dark); cursor: pointer; transition: 0.3s; }
+        .settings-btn:hover { transform: rotate(90deg); color: var(--primary); }
 
         /* CONTENIDO */
         .content-area { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 90px; }
         .screen { display: none; animation: fadeIn 0.3s ease; height: 100%; }
         .screen.active { display: block; }
 
-        /* --- WIFI --- */
+        /* --- PANTALLA WIFI --- */
         .wifi-wrapper { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 90%; text-align: center; }
         .wifi-btn { width: 160px; height: 160px; border-radius: 50%; background: var(--white); box-shadow: 0 10px 30px rgba(0, 155, 72, 0.1); display: flex; justify-content: center; align-items: center; flex-direction: column; cursor: pointer; position: relative; transition: 0.4s; border: 4px solid var(--primary-light); }
         .wifi-btn:active { transform: scale(0.95); }
@@ -45,23 +51,30 @@
         .wifi-btn.connected i, .wifi-btn.connected h3 { color: white; }
         .wifi-btn.connecting { border-color: var(--primary); animation: pulse 1.5s infinite; }
 
-        /* --- BICI --- */
+        /* --- PANTALLA BICI --- */
         .bike-wrapper { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 90%; text-align: center; }
         .lock-icon { font-size: 5rem; margin-bottom: 20px; transition: 0.3s; }
         .bike-locked .lock-icon { color: var(--danger); }
         .bike-unlocked .lock-icon { color: var(--primary); }
         
-        .action-btn { padding: 15px 30px; border-radius: 50px; font-size: 1.1rem; font-weight: bold; display: flex; align-items: center; gap: 10px; cursor: pointer; box-shadow: 0 10px 20px rgba(0,0,0,0.1); transition: 0.3s; color: white; border: none; width: 80%; justify-content: center; }
+        .action-btn { padding: 15px 30px; border-radius: 50px; font-size: 1.1rem; font-weight: bold; display: flex; align-items: center; gap: 10px; cursor: pointer; box-shadow: 0 10px 20px rgba(0,0,0,0.1); transition: 0.3s; color: white; border: none; width: 90%; justify-content: center; }
         .btn-green { background: var(--primary); }
         .btn-red { background: var(--danger); }
         
         .timer-box { margin-top: 30px; padding: 15px; background: var(--primary-light); border-radius: 15px; color: var(--primary); font-weight: bold; opacity: 0; transition: 0.3s; width: 80%; }
         .bike-unlocked .timer-box { opacity: 1; }
 
-        /* --- AJUSTES --- */
+        /* --- PANTALLA PREMIOS --- */
+        .level-card { background: linear-gradient(135deg, var(--primary), #007a38); color: white; border-radius: 20px; padding: 20px; margin-bottom: 25px; box-shadow: 0 10px 20px rgba(0,155,72,0.3); text-align: center; }
+        .progress-bar { background: rgba(255,255,255,0.3); height: 8px; border-radius: 10px; margin: 15px 0; overflow: hidden; position: relative; }
+        .progress-fill { background: white; height: 100%; width: 65%; border-radius: 10px; }
+        .reward-item { background: white; border-radius: 15px; padding: 15px; margin-bottom: 15px; display: flex; align-items: center; gap: 15px; border: 1px solid #f0f0f0; }
+        .reward-btn { background: var(--primary); color: white; border: none; padding: 8px 15px; border-radius: 10px; font-weight: bold; cursor: pointer; }
+        .reward-btn.locked { background: #eee; color: #999; cursor: not-allowed; }
+
+        /* --- PANTALLA AJUSTES --- */
         .settings-list { list-style: none; padding: 0; background: white; border-radius: 15px; overflow: hidden; }
         .settings-item { padding: 20px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; }
-        .settings-item:last-child { border-bottom: none; }
         .lang-options { display: flex; gap: 10px; }
         .lang-opt { padding: 5px 10px; border: 1px solid var(--gray); border-radius: 8px; cursor: pointer; font-size: 0.8rem; }
         .lang-opt.active { background: var(--primary); color: white; border-color: var(--primary); }
@@ -112,12 +125,28 @@
                 </div>
             </div>
 
+            <div id="screen-rewards" class="screen">
+                <div class="level-card">
+                    <h2 style="margin:0;">Eco-Warrior</h2>
+                    <div class="progress-bar"><div class="progress-fill"></div></div>
+                    <div style="display:flex; justify-content:space-between; font-size:0.8rem;"><span>12.5 kg</span><span>20 kg</span></div>
+                </div>
+                <h3 id="txt-rewards-title">Sariak</h3>
+                <div class="reward-item">
+                    <div style="flex:1"><h3>1 Hilabete Premium</h3><p>10kg CO2</p></div>
+                    <button class="reward-btn" onclick="alert('Zorionak!')">Trukatu</button>
+                </div>
+                <div class="reward-item">
+                    <div style="flex:1"><h3>iPhone 15</h3><p>50kg CO2</p></div>
+                    <button class="reward-btn locked"><i class="fas fa-lock"></i></button>
+                </div>
+            </div>
+
             <div id="screen-settings" class="screen">
-                <h3 style="margin-bottom:15px; color:var(--primary);">Ezarpenak / Ajustes</h3>
-                
+                <h3 style="margin-bottom:15px; color:var(--primary);" id="txt-settings-title">Ezarpenak</h3>
                 <ul class="settings-list">
                     <li class="settings-item">
-                        <span><i class="fas fa-globe"></i> Hizkuntza / Idioma</span>
+                        <span><i class="fas fa-globe"></i> <span id="txt-lang">Hizkuntza</span></span>
                         <div class="lang-options">
                             <div class="lang-opt active" onclick="setAppLang('eu', this)">EU</div>
                             <div class="lang-opt" onclick="setAppLang('es', this)">ES</div>
@@ -125,18 +154,12 @@
                         </div>
                     </li>
                     <li class="settings-item">
-                        <span><i class="fas fa-bell"></i> Jakinarazpenak</span>
-                        <i class="fas fa-toggle-on" style="color:var(--primary); font-size:1.5rem;"></i>
-                    </li>
-                    <li class="settings-item">
                         <span><i class="fas fa-moon"></i> Dark Mode</span>
                         <i class="fas fa-toggle-off" style="color:#ccc; font-size:1.5rem;"></i>
                     </li>
                 </ul>
-
-                <div style="margin-top:30px; text-align:center;">
-                    <p style="color:#999; font-size:0.8rem;">APN System App v1.0.4</p>
-                    <button style="background:none; border:none; color:#e74c3c; font-weight:bold; margin-top:10px;">Saioa itxi / Cerrar Sesión</button>
+                <div style="text-align:center; margin-top:30px;">
+                    <p style="color:#999; font-size:0.8rem;">APN App v1.0</p>
                 </div>
             </div>
 
@@ -145,7 +168,7 @@
         <div class="nav-bar">
             <i class="fas fa-bolt nav-icon active" id="nav-wifi" onclick="switchTab('wifi', this)"></i>
             <i class="fas fa-bicycle nav-icon" id="nav-bike" onclick="switchTab('bike', this)"></i>
-            <i class="fas fa-cog nav-icon" id="nav-settings" onclick="switchTab('settings', this)"></i>
+            <i class="fas fa-gift nav-icon" id="nav-rewards" onclick="switchTab('rewards', this)"></i>
         </div>
 
     </div>
@@ -157,9 +180,8 @@
             document.querySelectorAll('.nav-icon').forEach(n => n.classList.remove('active'));
             document.getElementById('screen-' + screenId).classList.add('active');
             
-            // Si venimos del botón de header, activar icono correspondiente
             if(element.classList.contains('settings-btn')) {
-                document.getElementById('nav-settings').classList.add('active');
+                // Si es el botón de ajustes, no marcamos nada abajo o creamos un estado neutro
             } else {
                 element.classList.add('active');
             }
@@ -174,17 +196,17 @@
                 btn.classList.add('connecting');
                 setTimeout(() => {
                     btn.classList.remove('connecting'); btn.classList.add('connected');
-                    text.innerText = currentLang === 'eu' ? "Konektatuta" : "Conectado";
+                    text.innerText = currentLang === 'eu' ? "Konektatuta" : (currentLang === 'es' ? "Conectado" : "Connected");
                     text.style.color = "white"; isWifiConnected = true;
                 }, 2000);
             } else {
                 btn.classList.remove('connected');
-                text.innerText = currentLang === 'eu' ? "Konektatu" : "Conectar";
+                text.innerText = currentLang === 'eu' ? "Konektatu" : (currentLang === 'es' ? "Conectar" : "Connect");
                 text.style.color = "var(--dark)"; isWifiConnected = false;
             }
         }
 
-        // --- BICI (Lógica Corregida) ---
+        // --- BICI (LÓGICA CORREGIDA: VERDE -> ABRIR, ROJO -> CERRAR) ---
         let isBikeUnlocked = false; 
         let timerInterval;
 
@@ -197,35 +219,35 @@
             const btnText = document.getElementById('txt-bike-btn');
 
             if (!isBikeUnlocked) {
-                // DESBLOQUEAR (Empezar viaje)
+                // ACCIÓN: DESBLOQUEAR (Empezar)
                 wrapper.classList.remove('bike-locked'); wrapper.classList.add('bike-unlocked');
                 icon.classList.remove('fa-lock'); icon.classList.add('fa-lock-open');
                 
                 // Textos según idioma
-                title.innerText = currentLang === 'eu' ? "Desblokeatuta!" : "¡Desbloqueada!";
-                desc.innerText = currentLang === 'eu' ? "Ondo ibili! Itzultzeko eskaneatu berriro." : "¡Buen viaje! Escanea de nuevo para devolver.";
+                if(currentLang === 'eu') { title.innerText = "Desblokeatuta!"; desc.innerText = "Ondo ibili!"; btnText.innerText = "Itzuli (Blokeatu)"; }
+                else if(currentLang === 'es') { title.innerText = "¡Desbloqueada!"; desc.innerText = "¡Buen viaje!"; btnText.innerText = "Devolver (Bloquear)"; }
+                else { title.innerText = "Unlocked!"; desc.innerText = "Enjoy!"; btnText.innerText = "Return (Lock)"; }
                 
-                // Botón cambia a ROJO para devolver
+                // Botón se vuelve ROJO
                 btn.classList.remove('btn-green'); btn.classList.add('btn-red');
-                btnText.innerText = currentLang === 'eu' ? "Itzuli (Blokeatu)" : "Devolver (Bloquear)";
                 
                 startTimer();
                 isBikeUnlocked = true;
             } else {
-                // BLOQUEAR (Terminar viaje)
+                // ACCIÓN: BLOQUEAR (Terminar)
                 wrapper.classList.remove('bike-unlocked'); wrapper.classList.add('bike-locked');
                 icon.classList.remove('fa-lock-open'); icon.classList.add('fa-lock');
                 
-                title.innerText = currentLang === 'eu' ? "Blokeatuta" : "Bloqueada";
-                desc.innerText = currentLang === 'eu' ? "Eskaneatu QR bizikleta erabiltzeko." : "Escanea el QR para usar la bici.";
+                if(currentLang === 'eu') { title.innerText = "Blokeatuta"; desc.innerText = "Eskaneatu QR erabiltzeko."; btnText.innerText = "Desblokeatu (Eskaneatu)"; }
+                else if(currentLang === 'es') { title.innerText = "Bloqueada"; desc.innerText = "Escanea QR para usar."; btnText.innerText = "Desbloquear (Escanear)"; }
+                else { title.innerText = "Locked"; desc.innerText = "Scan QR to use."; btnText.innerText = "Unlock (Scan)"; }
                 
-                // Botón cambia a VERDE para empezar
+                // Botón se vuelve VERDE
                 btn.classList.remove('btn-red'); btn.classList.add('btn-green');
-                btnText.innerText = currentLang === 'eu' ? "Desblokeatu (Eskaneatu)" : "Desbloquear (Escanear)";
                 
                 stopTimer();
                 isBikeUnlocked = false;
-                alert(currentLang === 'eu' ? "Bizikleta ondo itzuli da." : "Bicicleta devuelta correctamente.");
+                alert(currentLang === 'eu' ? "Bizikleta itzuli da." : "Bicicleta devuelta.");
             }
         }
 
@@ -240,40 +262,30 @@
         }
         function stopTimer() { clearInterval(timerInterval); document.getElementById('usageTimer').innerText = "00:00:00"; }
 
-        // --- IDIOMAS (NUEVO) ---
+        // --- IDIOMAS ---
         let currentLang = 'eu';
         
         function setAppLang(lang, element) {
             currentLang = lang;
-            // Actualizar botones visualmente
             document.querySelectorAll('.lang-opt').forEach(el => el.classList.remove('active'));
             element.classList.add('active');
 
-            // Textos simples
-            if(lang === 'es') {
-                document.getElementById('header-title').innerText = "¡Hola, Markel!";
-                if(!isWifiConnected) document.getElementById('txt-connect').innerText = "Conectar";
-                if(!isBikeUnlocked) {
-                    document.getElementById('txt-bike-status').innerText = "Bloqueada";
-                    document.getElementById('txt-bike-desc').innerText = "Escanea el QR para usar la bici.";
-                    document.getElementById('txt-bike-btn').innerText = "Desbloquear (Escanear)";
-                }
-            } else if(lang === 'en') {
-                document.getElementById('header-title').innerText = "Hello, Markel!";
-                if(!isWifiConnected) document.getElementById('txt-connect').innerText = "Connect";
-                if(!isBikeUnlocked) {
-                    document.getElementById('txt-bike-status').innerText = "Locked";
-                    document.getElementById('txt-bike-desc').innerText = "Scan QR to ride.";
-                    document.getElementById('txt-bike-btn').innerText = "Unlock (Scan)";
-                }
-            } else {
-                document.getElementById('header-title').innerText = "Kaixo, Markel!";
-                if(!isWifiConnected) document.getElementById('txt-connect').innerText = "Konektatu";
-                if(!isBikeUnlocked) {
-                    document.getElementById('txt-bike-status').innerText = "Blokeatuta";
-                    document.getElementById('txt-bike-desc').innerText = "Eskaneatu QR bizikleta erabiltzeko.";
-                    document.getElementById('txt-bike-btn').innerText = "Desblokeatu (Eskaneatu)";
-                }
+            const t = {
+                eu: { hello: "Kaixo, Markel!", con: "Konektatu", cond: "Konektatuta", bikeS: "Blokeatuta", bikeD: "Eskaneatu QR erabiltzeko.", bikeB: "Desblokeatu (Eskaneatu)", set: "Ezarpenak", lang: "Hizkuntza", rew: "Sariak" },
+                es: { hello: "¡Hola, Markel!", con: "Conectar", cond: "Conectado", bikeS: "Bloqueada", bikeD: "Escanea QR para usar.", bikeB: "Desbloquear (Escanear)", set: "Ajustes", lang: "Idioma", rew: "Premios" },
+                en: { hello: "Hello, Markel!", con: "Connect", cond: "Connected", bikeS: "Locked", bikeD: "Scan QR to use.", bikeB: "Unlock (Scan)", set: "Settings", lang: "Language", rew: "Rewards" }
+            };
+
+            document.getElementById('header-title').innerText = t[lang].hello;
+            document.getElementById('txt-settings-title').innerText = t[lang].set;
+            document.getElementById('txt-lang').innerText = t[lang].lang;
+            document.getElementById('txt-rewards-title').innerText = t[lang].rew;
+            
+            if(!isWifiConnected) document.getElementById('txt-connect').innerText = t[lang].con;
+            if(!isBikeUnlocked) {
+                document.getElementById('txt-bike-status').innerText = t[lang].bikeS;
+                document.getElementById('txt-bike-desc').innerText = t[lang].bikeD;
+                document.getElementById('txt-bike-btn').innerText = t[lang].bikeB;
             }
         }
     </script>
