@@ -17,7 +17,7 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <style>
-        /* --- ESTILOS GENERALES --- */
+        /* --- ESTILOS --- */
         :root {
             --primary: #009B48; --primary-light: #e0f7ea;
             --danger: #e74c3c; --warning: #f1c40f; --success: #2ecc71;
@@ -54,23 +54,21 @@
         .screen { display: none; animation: fadeIn 0.3s ease; height: 100%; width: 100%; }
         .screen.active { display: block; }
 
-        /* --- MAPA ESTILOS --- */
+        /* --- MAPA --- */
         #map { height: 100%; width: 100%; border-radius: 20px; z-index: 1; }
         .custom-pin {
             background-color: white; border-radius: 50%; border: 3px solid white;
             box-shadow: 0 3px 10px rgba(0,0,0,0.3); text-align: center; display: flex;
             justify-content: center; align-items: center; font-size: 1.2rem; color: white;
         }
-        /* Colores de batería */
         .pin-red { background-color: var(--danger); animation: pulse-red 2s infinite; }
         .pin-yellow { background-color: var(--warning); }
         .pin-green { background-color: var(--success); }
-        
-        /* Estilos Popup Mapa */
         .leaflet-popup-content h3 { margin: 0 0 5px; font-size: 1rem; color: var(--text-light); }
         .leaflet-popup-content p { margin: 3px 0; font-size: 0.85rem; }
 
-        /* --- PANTALLAS (WIFI, BICI, LOGIN...) --- */
+        /* --- PANTALLAS --- */
+        /* WiFi & Bici */
         .wifi-wrapper, .bike-wrapper { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 90%; text-align: center; }
         .wifi-btn { width: 160px; height: 160px; border-radius: 50%; background: var(--card-light); box-shadow: 0 10px 30px rgba(0, 155, 72, 0.1); display: flex; justify-content: center; align-items: center; flex-direction: column; cursor: pointer; position: relative; transition: 0.4s; border: 4px solid var(--primary-light); }
         .wifi-btn.connected { background: var(--primary)!important; border-color: var(--primary)!important; } .wifi-btn.connected i, .wifi-btn.connected h3 { color: white!important; } .wifi-btn.connecting { border-color: var(--primary); animation: pulse 1.5s infinite; }
@@ -81,9 +79,21 @@
         .action-btn { padding: 15px 30px; border-radius: 50px; font-size: 1.1rem; font-weight: bold; display: flex; align-items: center; gap: 10px; cursor: pointer; box-shadow: 0 10px 20px rgba(0,0,0,0.1); transition: 0.3s; color: white; border: none; width: 90%; justify-content: center; }
         .btn-green { background: var(--primary); } .btn-red { background: var(--danger); }
         .timer-box { margin-top: 30px; padding: 15px; background: var(--primary-light); border-radius: 15px; color: var(--primary); font-weight: bold; opacity: 0; width: 80%; } .bike-unlocked .timer-box { opacity: 1; }
-        
         .charging-status { margin-top: 10px; font-size: 0.9rem; font-weight: bold; color: var(--primary); display: flex; align-items: center; gap: 5px; opacity: 0; transition: 0.3s; }
         .bike-locked .charging-status { opacity: 1; }
+
+        /* Premios (ARREGLADO) */
+        .level-card { background: linear-gradient(135deg, var(--primary), #007a38); color: white; border-radius: 20px; padding: 20px; margin-bottom: 25px; box-shadow: 0 10px 20px rgba(0,155,72,0.3); text-align: center; }
+        .progress-bar { background: rgba(255,255,255,0.3); height: 8px; border-radius: 10px; margin: 15px 0; overflow: hidden; position: relative; }
+        .progress-fill { background: white; height: 100%; width: 65%; border-radius: 10px; }
+        /* Estilo corregido para items de premios */
+        .reward-item { background: var(--card-light); border-radius: 15px; padding: 15px; margin-bottom: 15px; display: flex; align-items: center; gap: 15px; border: 1px solid #eee; }
+        .mobile-frame.dark .reward-item { border-color: #374151; }
+        .reward-icon { width: 50px; height: 50px; background: var(--primary-light); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--primary); font-size: 1.5rem; }
+        .reward-info { flex: 1; } .reward-info h3 { margin: 0; font-size: 1rem; } .reward-info p { margin: 5px 0 0; font-size: 0.8rem; color: var(--text-gray); }
+        .reward-btn { background: var(--primary); color: white; border: none; padding: 8px 15px; border-radius: 10px; font-weight: bold; cursor: pointer; }
+        .reward-btn.locked { background: #eee; color: #999; cursor: not-allowed; }
+        .mobile-frame.dark .reward-btn.locked { background: #4b5563; color: #9ca3af; }
 
         /* Login & Perfil */
         .login-wrapper, .profile-wrapper { height: 100%; display: none; flex-direction: column; }
@@ -93,7 +103,10 @@
         .profile-summary-card { background: white; border-radius: 20px; padding: 20px; display: flex; justify-content: space-around; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-bottom: 25px; }
         .summary-val { font-size: 1.5rem; font-weight: 800; color: var(--primary); }
         
-        /* MENU */
+        /* Ajustes & Menu */
+        .settings-list { list-style: none; padding: 0; background: var(--card-light); border-radius: 15px; overflow: hidden; }
+        .settings-item { padding: 20px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+        .mobile-frame.dark .settings-item { border-color: #374151; }
         .nav-bar { background: var(--card-light); padding: 15px 25px; border-radius: 30px 30px 0 0; display:flex; justify-content: space-between; align-items: center; box-shadow: 0 -5px 20px rgba(0,0,0,0.03); position: absolute; bottom: 0; width: 100%; z-index: 20; }
         .nav-icon { font-size: 1.4rem; color: #d1d5db; cursor: pointer; transition: 0.3s; }
         .nav-icon.active { color: var(--primary); transform: translateY(-5px); }
@@ -136,37 +149,46 @@
                 </div>
             </div>
 
-            <div id="screen-wifi" class="screen"><div class="wifi-wrapper"><div class="wifi-btn" id="wifiBtn" onclick="connectWifi()"><i class="fas fa-wifi"></i><h3 id="txt-connect">Konektatu</h3></div><p style="margin-top:25px; color:var(--text-gray); font-weight:600; font-size:0.9rem;">EKI Seat #04 • Usurbil</p></div></div>
+            <div id="screen-wifi" class="screen"><div class="wifi-wrapper"><div class="wifi-btn" id="wifiBtn" onclick="connectWifi()"><i class="fas fa-wifi"></i><h3 id="txt-connect">Konektatu</h3></div><p style="margin-top:25px; color:var(--text-gray);">EKI Seat #04 • Usurbil</p></div></div>
             
-            <div id="screen-bike" class="screen">
-                <div id="bikeWrapper" class="bike-wrapper bike-locked">
-                    <i id="lockIcon" class="fas fa-lock lock-icon"></i>
-                    <h2 id="txt-bike-status" style="margin-bottom:5px;">Blokeatuta</h2>
-                    <div class="charging-status"><i class="fas fa-bolt"></i> <span>Kargatzen... %85</span></div>
-                    
-                    <p id="txt-bike-desc" style="color:var(--text-gray); margin-bottom:30px; margin-top:10px; font-size:0.9rem;">Eskaneatu QR bizikleta erabiltzeko.</p>
-                    
-                    <button id="bikeBtn" class="action-btn btn-green" onclick="toggleBikeLock()">
-                        <i class="fas fa-qrcode"></i> <span id="txt-bike-btn">Desblokeatu (Eskaneatu)</span>
-                    </button>
-                    
-                    <div class="timer-box"><i class="fas fa-clock"></i> <span id="usageTimer">00:00:00</span></div>
-                </div>
-            </div>
+            <div id="screen-bike" class="screen"><div id="bikeWrapper" class="bike-wrapper bike-locked"><i id="lockIcon" class="fas fa-lock lock-icon"></i><h2 id="txt-bike-status" style="margin-bottom:5px;">Blokeatuta</h2><div class="charging-status"><i class="fas fa-bolt"></i> <span>Kargatzen... %85</span></div><p id="txt-bike-desc" style="color:var(--text-gray); margin-bottom:30px; margin-top:10px; font-size:0.9rem;">Eskaneatu QR erabiltzeko.</p><button id="bikeBtn" class="action-btn btn-green" onclick="toggleBikeLock()"><i class="fas fa-qrcode"></i> <span id="txt-bike-btn">Desblokeatu</span></button><div class="timer-box"><i class="fas fa-clock"></i> <span id="usageTimer">00:00:00</span></div></div></div>
             
             <div id="screen-map" class="screen" style="padding:0; border-radius:20px; overflow:hidden;"><div id="map"></div></div>
             
-            <div id="screen-rewards" class="screen"><div class="level-card"><h2 style="margin:0;">Eco-Warrior</h2><div class="progress-bar"><div class="progress-fill"></div></div><div style="display:flex; justify-content:space-between; font-size:0.8rem;"><span>12.5 kg</span><span>20 kg</span></div></div><h3 id="txt-rewards-title">Sariak</h3><div class="reward-item"><div style="flex:1"><h3>1 Hilabete Premium</h3><p>10kg CO2</p></div><button class="reward-btn" onclick="alert('Zorionak!')">Trukatu</button></div></div>
+            <div id="screen-rewards" class="screen">
+                <div class="level-card">
+                    <h2 style="margin:0;">Eco-Warrior</h2>
+                    <div class="progress-bar"><div class="progress-fill"></div></div>
+                    <div style="display:flex; justify-content:space-between; font-size:0.8rem;"><span>12.5 kg</span><span>20 kg</span></div>
+                </div>
+                <h3 id="txt-rewards-title">Sariak</h3>
+                
+                <div class="reward-item">
+                    <div class="reward-icon"><i class="fas fa-star"></i></div>
+                    <div class="reward-info"><h3>1 Hilabete Premium</h3><p>10kg CO2</p></div>
+                    <button class="reward-btn" onclick="alert('Zorionak!')">Trukatu</button>
+                </div>
+                <div class="reward-item">
+                    <div class="reward-icon" style="background:#f3f4f6; color:#333;"><i class="fas fa-mobile-alt"></i></div>
+                    <div class="reward-info"><h3>iPhone 15</h3><p>50kg CO2</p></div>
+                    <button class="reward-btn locked"><i class="fas fa-lock"></i></button>
+                </div>
+                <div class="reward-item">
+                    <div class="reward-icon" style="background:#f3f4f6; color:#666;"><i class="fas fa-laptop"></i></div>
+                    <div class="reward-info"><h3>MacBook Air</h3><p>100kg CO2</p></div>
+                    <button class="reward-btn locked"><i class="fas fa-lock"></i></button>
+                </div>
+            </div>
 
             <div id="screen-settings" class="screen">
                 <h3 style="margin-bottom:15px; color:var(--primary);">Ezarpenak</h3>
                 <ul class="settings-list">
                     <li class="settings-item"><span><i class="fas fa-globe"></i> Hizkuntza</span><div class="lang-options"><div class="lang-opt active" onclick="setAppLang('eu', this)">EU</div><div class="lang-opt" onclick="setAppLang('es', this)">ES</div><div class="lang-opt" onclick="setAppLang('en', this)">EN</div></div></li>
-                    <li class="settings-item"><span><i class="fas fa-moon"></i> Dark Mode</span><i class="fas fa-toggle-off" id="darkModeIcon" style="color:#ccc; font-size:1.5rem; cursor:pointer;" onclick="toggleDarkMode()"></i></li>
+                    <li class="settings-item"><span><i class="fas fa-moon"></i> Dark Mode</span><i class="fas fa-toggle-off" id="darkModeIcon" onclick="toggleDarkMode()" style="font-size:1.5rem; color:#ccc; cursor:pointer;"></i></li>
                 </ul>
                 <div style="text-align:center; margin-top:30px;">
                     <button class="action-btn btn-red" style="width:100%;" onclick="doLogout()"><i class="fas fa-sign-out-alt"></i> Saioa itxi</button>
-                    <p style="color:var(--text-gray); font-size:0.8rem; margin-top:20px;">APN App v6.0 (Map & Battery)</p>
+                    <p style="color:var(--text-gray); font-size:0.8rem; margin-top:20px;">APN App v9.0 Final</p>
                 </div>
             </div>
 
@@ -192,35 +214,40 @@
             if(screenId === 'map') setTimeout(() => { map.invalidateSize(); }, 100);
         }
 
-        // --- MAPA INTELIGENTE (ZARAUTZ + BATERÍA) ---
-        var map = L.map('map', {zoomControl: false}).setView([43.2844, -2.1722], 15);
+        // --- MAPA GIPUZKOA (Puntos en Usurbil, Orio, Lasarte, Zumaia) ---
+        // Centrado en un punto medio
+        var map = L.map('map', {zoomControl: false}).setView([43.28, -2.15], 12);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
         const stations = [
-            // BANCO: 100% Batería (VERDE)
-            { t: 'bench', lat: 43.2860, lng: -2.1700, b: 100, n: 'EKI Seat #01 (Malecon)' },
-            // MESA: 10% Batería (ROJO - BLOQUEADO)
-            { t: 'table', lat: 43.2830, lng: -2.1750, b: 10, n: 'KALEA Work #03 (Parkea)' },
-            // BICI: 45% Batería (AMARILLO - MEDIO)
-            { t: 'bike', lat: 43.2850, lng: -2.1730, b: 45, n: 'HIRI Go #05 (Zentroa)' }
+            // USURBIL
+            { t: 'bench', lat: 43.2714, lng: -2.0433, b: 90, n: 'EKI Seat (Usurbil Centro)' },
+            { t: 'bike', lat: 43.2720, lng: -2.0440, b: 100, n: 'HIRI Go (Usurbil LH)' },
+            // ORIO
+            { t: 'table', lat: 43.2769, lng: -2.1292, b: 45, n: 'KALEA Work (Orio Puerto)' },
+            { t: 'bike', lat: 43.2780, lng: -2.1300, b: 12, n: 'HIRI Go (Orio Playa)' }, // Rojo
+            // LASARTE
+            { t: 'bench', lat: 43.2675, lng: -2.0203, b: 10, n: 'EKI Seat (Lasarte)' }, // Rojo
+            // ZUMAIA
+            { t: 'table', lat: 43.2983, lng: -2.2572, b: 60, n: 'KALEA Work (Zumaia Flysch)' },
+            // ZARAUTZ
+            { t: 'bike', lat: 43.2844, lng: -2.1722, b: 85, n: 'HIRI Go (Zarautz)' }
         ];
 
         stations.forEach(st => {
             let colorClass = '', statusMsg = '', icon = '';
-            
-            // Lógica de Batería
+            // Lógica Semáforo
             if(st.b < 15) {
-                colorClass = 'pin-red'; // Rojo
-                statusMsg = '<b style="color:red">⛔ SISTEMA BLOQUEADO</b><br>USB/Enchufe: Desactivado<br>Carga < 15%';
+                colorClass = 'pin-red';
+                statusMsg = '<b style="color:red">⛔ SISTEMA BLOQUEADO</b><br>Carga Critica < 15%';
             } else if (st.b <= 50) {
-                colorClass = 'pin-yellow'; // Amarillo
+                colorClass = 'pin-yellow';
                 statusMsg = '<b style="color:#f1c40f">⚠️ Batería Media</b><br>Rendimiento Limitado';
             } else {
-                colorClass = 'pin-green'; // Verde
+                colorClass = 'pin-green';
                 statusMsg = '<b style="color:green">✅ Disponible</b><br>Rendimiento Óptimo';
             }
 
-            // Iconos por tipo
             if(st.t == 'bench') icon = 'fa-chair';
             if(st.t == 'table') icon = 'fa-umbrella-beach';
             if(st.t == 'bike') icon = 'fa-bicycle';
@@ -251,7 +278,6 @@
         function setAppLang(lang, element) {
             currentLang = lang;
             document.querySelectorAll('.lang-opt').forEach(el => el.classList.remove('active')); element.classList.add('active');
-            // Aquí podrías añadir la lógica de textos si la necesitas, por ahora mantiene el diseño
         }
     </script>
 </body>
