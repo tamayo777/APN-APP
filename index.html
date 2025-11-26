@@ -12,34 +12,33 @@
     <link rel="icon" type="image/png" href="https://i.imgur.com/XXsk6Hm.png">
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <style>
-        /* --- ESTILOS --- */
+        /* --- ESTILOS GENERALES --- */
         :root {
             --primary: #009B48; --primary-light: #e0f7ea;
-            --danger: #e74c3c; 
+            --danger: #e74c3c; --warning: #f1c40f; --success: #2ecc71;
             --bg-light: #f3f4f6; --bg-dark: #111827;
             --card-light: #ffffff; --card-dark: #1f2937;
-            --text-light: #1f2937; --text-dark: #f9fafb;
-            --text-gray: #9ca3af;
+            --text-light: #1f2937; --text-dark: #f9fafb; --text-gray: #9ca3af;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; -webkit-tap-highlight-color: transparent; transition: background-color 0.3s, color 0.3s; }
-        
         body { background-color: #e5e5e5; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
 
-        /* MODO OSCURO (CLASES) */
+        /* MODO OSCURO */
         .dark-mode { background-color: #000 !important; }
         .mobile-frame.dark { background: var(--bg-dark); color: var(--text-dark); border-color: #333; }
-        .mobile-frame.dark .header, 
-        .mobile-frame.dark .nav-bar,
-        .mobile-frame.dark .settings-list,
-        .mobile-frame.dark .reward-item { background: var(--card-dark); color: var(--text-dark); border-color: #374151; }
+        .mobile-frame.dark .header, .mobile-frame.dark .nav-bar, .mobile-frame.dark .settings-list, .mobile-frame.dark .reward-item, .mobile-frame.dark .profile-summary-card, .mobile-frame.dark .activity-item, .mobile-frame.dark .login-input { background: var(--card-dark); color: var(--text-dark); border-color: #374151; }
         .mobile-frame.dark .wifi-btn { background: var(--card-dark); border-color: #374151; box-shadow: none; }
-        .mobile-frame.dark .wifi-btn h3, 
-        .mobile-frame.dark .settings-item span { color: var(--text-dark); }
-        .mobile-frame.dark .settings-btn { color: var(--text-dark); }
-        .mobile-frame.dark .nav-icon { color: #4b5563; }
+        .mobile-frame.dark .wifi-btn h3, .mobile-frame.dark .settings-item span, .mobile-frame.dark .activity-item h4 { color: var(--text-dark); }
+        .mobile-frame.dark .settings-btn, .mobile-frame.dark .nav-icon { color: #4b5563; }
         .mobile-frame.dark .nav-icon.active { color: var(--primary); }
+        .mobile-frame.dark .leaflet-popup-content-wrapper { background: var(--card-dark); color: var(--text-dark); }
+        .mobile-frame.dark .leaflet-popup-tip { background: var(--card-dark); }
+        .mobile-frame.dark .leaflet-popup-content h3 { color: var(--text-dark) !important; }
 
         /* MARCO MOVIL */
         .mobile-frame { width: 100%; height: 100vh; background: var(--bg-light); overflow: hidden; position: relative; display: flex; flex-direction: column; color: var(--text-light); }
@@ -49,68 +48,59 @@
         .header { padding: 40px 25px 15px; display: flex; justify-content: space-between; align-items: center; background: var(--card-light); z-index: 10; box-shadow: 0 2px 10px rgba(0,0,0,0.03); }
         .header h1 { font-size: 1.3rem; font-weight: 800; margin: 0; }
         .settings-btn { font-size: 1.5rem; cursor: pointer; transition: 0.3s; }
-        .settings-btn:hover { transform: rotate(90deg); color: var(--primary); }
 
         /* CONTENIDO */
-        .content-area { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 90px; }
-        .screen { display: none; animation: fadeIn 0.3s ease; height: 100%; }
+        .content-area { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 90px; position: relative; }
+        .screen { display: none; animation: fadeIn 0.3s ease; height: 100%; width: 100%; }
         .screen.active { display: block; }
 
-        /* --- WIFI --- */
-        .wifi-wrapper { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 90%; text-align: center; }
-        .wifi-btn { width: 160px; height: 160px; border-radius: 50%; background: var(--card-light); box-shadow: 0 10px 30px rgba(0, 155, 72, 0.1); display: flex; justify-content: center; align-items: center; flex-direction: column; cursor: pointer; position: relative; transition: 0.4s; border: 4px solid var(--primary-light); }
-        .wifi-btn:active { transform: scale(0.95); }
-        .wifi-btn i { font-size: 3rem; color: var(--primary); margin-bottom: 5px; }
-        .wifi-btn.connected { background: var(--primary) !important; border-color: var(--primary) !important; }
-        .wifi-btn.connected i, .wifi-btn.connected h3 { color: white !important; }
-        .wifi-btn.connecting { border-color: var(--primary); animation: pulse 1.5s infinite; }
-
-        /* --- BICI --- */
-        .bike-wrapper { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 90%; text-align: center; }
-        .lock-icon { font-size: 5rem; margin-bottom: 20px; transition: 0.3s; }
-        .bike-locked .lock-icon { color: var(--danger); }
-        .bike-unlocked .lock-icon { color: var(--primary); }
-        
-        /* Indicador de Carga */
-        .charging-status { 
-            margin-top: 10px; font-size: 0.9rem; font-weight: bold; color: var(--primary); 
-            display: flex; align-items: center; gap: 5px; opacity: 0; transition: 0.3s;
+        /* --- MAPA ESTILOS --- */
+        #map { height: 100%; width: 100%; border-radius: 20px; z-index: 1; }
+        .custom-pin {
+            background-color: white; border-radius: 50%; border: 3px solid white;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.3); text-align: center; display: flex;
+            justify-content: center; align-items: center; font-size: 1.2rem; color: white;
         }
-        .bike-locked .charging-status { opacity: 1; }
+        /* Colores de batería */
+        .pin-red { background-color: var(--danger); animation: pulse-red 2s infinite; }
+        .pin-yellow { background-color: var(--warning); }
+        .pin-green { background-color: var(--success); }
         
+        /* Estilos Popup Mapa */
+        .leaflet-popup-content h3 { margin: 0 0 5px; font-size: 1rem; color: var(--text-light); }
+        .leaflet-popup-content p { margin: 3px 0; font-size: 0.85rem; }
+
+        /* --- PANTALLAS (WIFI, BICI, LOGIN...) --- */
+        .wifi-wrapper, .bike-wrapper { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 90%; text-align: center; }
+        .wifi-btn { width: 160px; height: 160px; border-radius: 50%; background: var(--card-light); box-shadow: 0 10px 30px rgba(0, 155, 72, 0.1); display: flex; justify-content: center; align-items: center; flex-direction: column; cursor: pointer; position: relative; transition: 0.4s; border: 4px solid var(--primary-light); }
+        .wifi-btn.connected { background: var(--primary)!important; border-color: var(--primary)!important; } .wifi-btn.connected i, .wifi-btn.connected h3 { color: white!important; } .wifi-btn.connecting { border-color: var(--primary); animation: pulse 1.5s infinite; }
+        .wifi-btn i { font-size: 3rem; color: var(--primary); margin-bottom: 5px; }
+        
+        .bike-wrapper i.lock-icon { font-size: 5rem; margin-bottom: 20px; transition: 0.3s; }
+        .bike-locked .lock-icon { color: var(--danger); } .bike-unlocked .lock-icon { color: var(--primary); }
         .action-btn { padding: 15px 30px; border-radius: 50px; font-size: 1.1rem; font-weight: bold; display: flex; align-items: center; gap: 10px; cursor: pointer; box-shadow: 0 10px 20px rgba(0,0,0,0.1); transition: 0.3s; color: white; border: none; width: 90%; justify-content: center; }
-        .btn-green { background: var(--primary); }
-        .btn-red { background: var(--danger); }
+        .btn-green { background: var(--primary); } .btn-red { background: var(--danger); }
+        .timer-box { margin-top: 30px; padding: 15px; background: var(--primary-light); border-radius: 15px; color: var(--primary); font-weight: bold; opacity: 0; width: 80%; } .bike-unlocked .timer-box { opacity: 1; }
         
-        .timer-box { margin-top: 30px; padding: 15px; background: var(--primary-light); border-radius: 15px; color: var(--primary); font-weight: bold; opacity: 0; transition: 0.3s; width: 80%; }
-        .mobile-frame.dark .timer-box { background: #064e3b; color: #34d399; }
-        .bike-unlocked .timer-box { opacity: 1; }
+        .charging-status { margin-top: 10px; font-size: 0.9rem; font-weight: bold; color: var(--primary); display: flex; align-items: center; gap: 5px; opacity: 0; transition: 0.3s; }
+        .bike-locked .charging-status { opacity: 1; }
 
-        /* --- PREMIOS --- */
-        .level-card { background: linear-gradient(135deg, var(--primary), #007a38); color: white; border-radius: 20px; padding: 20px; margin-bottom: 25px; box-shadow: 0 10px 20px rgba(0,155,72,0.3); text-align: center; }
-        .progress-bar { background: rgba(255,255,255,0.3); height: 8px; border-radius: 10px; margin: 15px 0; overflow: hidden; position: relative; }
-        .progress-fill { background: white; height: 100%; width: 65%; border-radius: 10px; }
-        .reward-item { background: var(--card-light); border-radius: 15px; padding: 15px; margin-bottom: 15px; display: flex; align-items: center; gap: 15px; border: 1px solid #eee; }
-        .mobile-frame.dark .reward-item { border-color: #374151; }
-        .reward-btn { background: var(--primary); color: white; border: none; padding: 8px 15px; border-radius: 10px; font-weight: bold; cursor: pointer; }
-        .reward-btn.locked { background: #eee; color: #999; cursor: not-allowed; }
-        .mobile-frame.dark .reward-btn.locked { background: #4b5563; color: #9ca3af; }
-
-        /* --- AJUSTES --- */
-        .settings-list { list-style: none; padding: 0; background: var(--card-light); border-radius: 15px; overflow: hidden; }
-        .settings-item { padding: 20px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
-        .mobile-frame.dark .settings-item { border-color: #374151; }
-        .lang-options { display: flex; gap: 10px; }
-        .lang-opt { padding: 5px 10px; border: 1px solid var(--text-gray); border-radius: 8px; cursor: pointer; font-size: 0.8rem; }
-        .lang-opt.active { background: var(--primary); color: white; border-color: var(--primary); }
-
-        /* --- MENU --- */
-        .nav-bar { background: var(--card-light); padding: 15px 30px; border-radius: 30px 30px 0 0; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 -5px 20px rgba(0,0,0,0.03); position: absolute; bottom: 0; width: 100%; z-index: 20; }
+        /* Login & Perfil */
+        .login-wrapper, .profile-wrapper { height: 100%; display: none; flex-direction: column; }
+        .login-wrapper.active, .profile-wrapper.active { display: flex; }
+        .login-wrapper { justify-content: center; align-items: center; text-align: center; }
+        .login-input { width: 100%; padding: 15px; margin-bottom: 15px; border: 1px solid #eee; border-radius: 10px; background: white; }
+        .profile-summary-card { background: white; border-radius: 20px; padding: 20px; display: flex; justify-content: space-around; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-bottom: 25px; }
+        .summary-val { font-size: 1.5rem; font-weight: 800; color: var(--primary); }
+        
+        /* MENU */
+        .nav-bar { background: var(--card-light); padding: 15px 25px; border-radius: 30px 30px 0 0; display:flex; justify-content: space-between; align-items: center; box-shadow: 0 -5px 20px rgba(0,0,0,0.03); position: absolute; bottom: 0; width: 100%; z-index: 20; }
         .nav-icon { font-size: 1.4rem; color: #d1d5db; cursor: pointer; transition: 0.3s; }
         .nav-icon.active { color: var(--primary); transform: translateY(-5px); }
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(0, 155, 72, 0.4); } 70% { box-shadow: 0 0 0 20px rgba(0, 155, 72, 0); } 100% { box-shadow: 0 0 0 0 rgba(0, 155, 72, 0); } }
+        @keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(231, 76, 60, 0); } 100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); } }
     </style>
 </head>
 <body>
@@ -118,87 +108,76 @@
     <div class="mobile-frame" id="mainFrame">
         
         <div class="header">
-            <h1 id="header-title">Kaixo, Markel!</h1>
+            <h1 id="header-title">Ongi etorri!</h1>
             <i class="fas fa-cog settings-btn" onclick="switchTab('settings', this)"></i>
         </div>
 
         <div class="content-area">
             
-            <div id="screen-wifi" class="screen active">
-                <div class="wifi-wrapper">
-                    <div class="wifi-btn" id="wifiBtn" onclick="connectWifi()">
-                        <i class="fas fa-wifi"></i>
-                        <h3 id="txt-connect">Konektatu</h3>
+            <div id="screen-home" class="screen active">
+                <div id="login-wrapper" class="login-wrapper active">
+                    <img src="https://i.imgur.com/XXsk6Hm.png" style="height: 80px; margin-bottom:20px;">
+                    <h2 style="color:var(--primary);">APN System</h2>
+                    <input type="email" class="login-input" placeholder="Posta / Email">
+                    <input type="password" class="login-input" placeholder="Pasahitza">
+                    <button class="action-btn btn-green" onclick="doLogin()">Sartu</button>
+                </div>
+                <div id="profile-wrapper" class="profile-wrapper">
+                    <div style="text-align:center; margin-bottom:20px;">
+                        <img src="https://ui-avatars.com/api/?name=Markel+Tamayo&background=009B48&color=fff&size=200" style="width:100px; border-radius:50%; border:4px solid var(--primary);">
+                        <h2 style="margin:10px 0;">Markel Tamayo</h2>
+                        <span style="background:var(--primary-light); color:var(--primary); padding:5px 15px; border-radius:20px; font-weight:bold; font-size:0.8rem;">Eco-Warrior Nvl. 3</span>
                     </div>
-                    <p style="margin-top:25px; color:var(--text-gray); font-weight:600; font-size:0.9rem;">EKI Seat #04 • Usurbil</p>
+                    <div class="profile-summary-card">
+                        <div style="text-align:center;"><div class="summary-val">12.5</div><div style="font-size:0.8rem;">kg CO2</div></div>
+                        <div style="text-align:center;"><div class="summary-val">42</div><div style="font-size:0.8rem;">Ordu</div></div>
+                        <div style="text-align:center;"><div class="summary-val">150</div><div style="font-size:0.8rem;">Puntu</div></div>
+                    </div>
                 </div>
             </div>
 
+            <div id="screen-wifi" class="screen"><div class="wifi-wrapper"><div class="wifi-btn" id="wifiBtn" onclick="connectWifi()"><i class="fas fa-wifi"></i><h3 id="txt-connect">Konektatu</h3></div><p style="margin-top:25px; color:var(--text-gray); font-weight:600; font-size:0.9rem;">EKI Seat #04 • Usurbil</p></div></div>
+            
             <div id="screen-bike" class="screen">
                 <div id="bikeWrapper" class="bike-wrapper bike-locked">
                     <i id="lockIcon" class="fas fa-lock lock-icon"></i>
                     <h2 id="txt-bike-status" style="margin-bottom:5px;">Blokeatuta</h2>
+                    <div class="charging-status"><i class="fas fa-bolt"></i> <span>Kargatzen... %85</span></div>
                     
-                    <div class="charging-status">
-                        <i class="fas fa-bolt"></i> <span id="txt-charging">Kargatzen... %85</span>
-                    </div>
-
                     <p id="txt-bike-desc" style="color:var(--text-gray); margin-bottom:30px; margin-top:10px; font-size:0.9rem;">Eskaneatu QR bizikleta erabiltzeko.</p>
                     
                     <button id="bikeBtn" class="action-btn btn-green" onclick="toggleBikeLock()">
                         <i class="fas fa-qrcode"></i> <span id="txt-bike-btn">Desblokeatu (Eskaneatu)</span>
                     </button>
-
-                    <div class="timer-box">
-                        <i class="fas fa-clock"></i> <span id="usageTimer">00:00:00</span>
-                    </div>
+                    
+                    <div class="timer-box"><i class="fas fa-clock"></i> <span id="usageTimer">00:00:00</span></div>
                 </div>
             </div>
-
-            <div id="screen-rewards" class="screen">
-                <div class="level-card">
-                    <h2 style="margin:0;">Eco-Warrior</h2>
-                    <div class="progress-bar"><div class="progress-fill"></div></div>
-                    <div style="display:flex; justify-content:space-between; font-size:0.8rem;"><span>12.5 kg</span><span>20 kg</span></div>
-                </div>
-                <h3 id="txt-rewards-title">Sariak</h3>
-                <div class="reward-item">
-                    <div style="flex:1"><h3>1 Hilabete Premium</h3><p>10kg CO2</p></div>
-                    <button class="reward-btn" onclick="alert('Zorionak!')">Trukatu</button>
-                </div>
-                <div class="reward-item">
-                    <div style="flex:1"><h3>iPhone 15</h3><p>50kg CO2</p></div>
-                    <button class="reward-btn locked"><i class="fas fa-lock"></i></button>
-                </div>
-            </div>
+            
+            <div id="screen-map" class="screen" style="padding:0; border-radius:20px; overflow:hidden;"><div id="map"></div></div>
+            
+            <div id="screen-rewards" class="screen"><div class="level-card"><h2 style="margin:0;">Eco-Warrior</h2><div class="progress-bar"><div class="progress-fill"></div></div><div style="display:flex; justify-content:space-between; font-size:0.8rem;"><span>12.5 kg</span><span>20 kg</span></div></div><h3 id="txt-rewards-title">Sariak</h3><div class="reward-item"><div style="flex:1"><h3>1 Hilabete Premium</h3><p>10kg CO2</p></div><button class="reward-btn" onclick="alert('Zorionak!')">Trukatu</button></div></div>
 
             <div id="screen-settings" class="screen">
-                <h3 style="margin-bottom:15px; color:var(--primary);" id="txt-settings-title">Ezarpenak</h3>
+                <h3 style="margin-bottom:15px; color:var(--primary);">Ezarpenak</h3>
                 <ul class="settings-list">
-                    <li class="settings-item">
-                        <span><i class="fas fa-globe"></i> <span id="txt-lang">Hizkuntza</span></span>
-                        <div class="lang-options">
-                            <div class="lang-opt active" onclick="setAppLang('eu', this)">EU</div>
-                            <div class="lang-opt" onclick="setAppLang('es', this)">ES</div>
-                            <div class="lang-opt" onclick="setAppLang('en', this)">EN</div>
-                        </div>
-                    </li>
-                    <li class="settings-item">
-                        <span><i class="fas fa-moon"></i> Dark Mode</span>
-                        <i class="fas fa-toggle-off" id="darkModeIcon" style="color:#ccc; font-size:1.5rem; cursor:pointer;" onclick="toggleDarkMode()"></i>
-                    </li>
+                    <li class="settings-item"><span><i class="fas fa-globe"></i> Hizkuntza</span><div class="lang-options"><div class="lang-opt active" onclick="setAppLang('eu', this)">EU</div><div class="lang-opt" onclick="setAppLang('es', this)">ES</div><div class="lang-opt" onclick="setAppLang('en', this)">EN</div></div></li>
+                    <li class="settings-item"><span><i class="fas fa-moon"></i> Dark Mode</span><i class="fas fa-toggle-off" id="darkModeIcon" style="color:#ccc; font-size:1.5rem; cursor:pointer;" onclick="toggleDarkMode()"></i></li>
                 </ul>
                 <div style="text-align:center; margin-top:30px;">
-                    <p style="color:var(--text-gray); font-size:0.8rem;">APN App v2.0</p>
+                    <button class="action-btn btn-red" style="width:100%;" onclick="doLogout()"><i class="fas fa-sign-out-alt"></i> Saioa itxi</button>
+                    <p style="color:var(--text-gray); font-size:0.8rem; margin-top:20px;">APN App v6.0 (Map & Battery)</p>
                 </div>
             </div>
 
         </div>
 
         <div class="nav-bar">
-            <i class="fas fa-bolt nav-icon active" id="nav-wifi" onclick="switchTab('wifi', this)"></i>
+            <i class="fas fa-home nav-icon active" id="nav-home" onclick="switchTab('home', this)"></i>
+            <i class="fas fa-bolt nav-icon" id="nav-wifi" onclick="switchTab('wifi', this)"></i>
             <i class="fas fa-bicycle nav-icon" id="nav-bike" onclick="switchTab('bike', this)"></i>
             <i class="fas fa-gift nav-icon" id="nav-rewards" onclick="switchTab('rewards', this)"></i>
+            <i class="fas fa-map-marked-alt nav-icon" id="nav-map" onclick="switchTab('map', this)"></i>
         </div>
 
     </div>
@@ -209,109 +188,70 @@
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.nav-icon').forEach(n => n.classList.remove('active'));
             document.getElementById('screen-' + screenId).classList.add('active');
-            if(!element.classList.contains('settings-btn')) { element.classList.add('active'); }
+            if(!element.classList.contains('settings-btn')) element.classList.add('active');
+            if(screenId === 'map') setTimeout(() => { map.invalidateSize(); }, 100);
         }
 
-        // --- DARK MODE ---
-        let isDarkMode = false;
-        function toggleDarkMode() {
-            isDarkMode = !isDarkMode;
-            const frame = document.getElementById('mainFrame');
-            const icon = document.getElementById('darkModeIcon');
+        // --- MAPA INTELIGENTE (ZARAUTZ + BATERÍA) ---
+        var map = L.map('map', {zoomControl: false}).setView([43.2844, -2.1722], 15);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+        const stations = [
+            // BANCO: 100% Batería (VERDE)
+            { t: 'bench', lat: 43.2860, lng: -2.1700, b: 100, n: 'EKI Seat #01 (Malecon)' },
+            // MESA: 10% Batería (ROJO - BLOQUEADO)
+            { t: 'table', lat: 43.2830, lng: -2.1750, b: 10, n: 'KALEA Work #03 (Parkea)' },
+            // BICI: 45% Batería (AMARILLO - MEDIO)
+            { t: 'bike', lat: 43.2850, lng: -2.1730, b: 45, n: 'HIRI Go #05 (Zentroa)' }
+        ];
+
+        stations.forEach(st => {
+            let colorClass = '', statusMsg = '', icon = '';
             
-            if(isDarkMode) {
-                frame.classList.add('dark');
-                document.body.classList.add('dark-mode'); // Cambia fondo de pantalla también
-                icon.classList.remove('fa-toggle-off');
-                icon.classList.add('fa-toggle-on');
-                icon.style.color = "var(--primary)";
+            // Lógica de Batería
+            if(st.b < 15) {
+                colorClass = 'pin-red'; // Rojo
+                statusMsg = '<b style="color:red">⛔ SISTEMA BLOQUEADO</b><br>USB/Enchufe: Desactivado<br>Carga < 15%';
+            } else if (st.b <= 50) {
+                colorClass = 'pin-yellow'; // Amarillo
+                statusMsg = '<b style="color:#f1c40f">⚠️ Batería Media</b><br>Rendimiento Limitado';
             } else {
-                frame.classList.remove('dark');
-                document.body.classList.remove('dark-mode');
-                icon.classList.remove('fa-toggle-on');
-                icon.classList.add('fa-toggle-off');
-                icon.style.color = "#ccc";
+                colorClass = 'pin-green'; // Verde
+                statusMsg = '<b style="color:green">✅ Disponible</b><br>Rendimiento Óptimo';
             }
-        }
 
-        // --- WIFI ---
-        let isWifiConnected = false;
-        function connectWifi() {
-            const btn = document.getElementById('wifiBtn');
-            const text = document.getElementById('txt-connect');
-            if (!isWifiConnected) {
-                btn.classList.add('connecting');
-                setTimeout(() => {
-                    btn.classList.remove('connecting'); btn.classList.add('connected');
-                    text.innerText = currentLang === 'eu' ? "Konektatuta" : (currentLang === 'es' ? "Conectado" : "Connected");
-                    text.style.color = "white"; isWifiConnected = true;
-                }, 2000);
-            } else {
-                btn.classList.remove('connected');
-                text.innerText = currentLang === 'eu' ? "Konektatu" : (currentLang === 'es' ? "Conectar" : "Connect");
-                text.style.color = isDarkMode ? "white" : "var(--dark)"; isWifiConnected = false;
-            }
-        }
+            // Iconos por tipo
+            if(st.t == 'bench') icon = 'fa-chair';
+            if(st.t == 'table') icon = 'fa-umbrella-beach';
+            if(st.t == 'bike') icon = 'fa-bicycle';
 
-        // --- BICI ---
-        let isBikeUnlocked = false; let timerInterval;
-        function toggleBikeLock() {
-            const wrapper = document.getElementById('bikeWrapper');
-            const icon = document.getElementById('lockIcon');
-            const title = document.getElementById('txt-bike-status');
-            const desc = document.getElementById('txt-bike-desc');
-            const btn = document.getElementById('bikeBtn');
-            const btnText = document.getElementById('txt-bike-btn');
+            L.marker([st.lat, st.lng], {
+                icon: L.divIcon({
+                    className: 'c',
+                    html: `<div class='custom-pin ${colorClass}'><i class='fas ${icon}'></i></div>`,
+                    iconSize: [40,40]
+                })
+            }).addTo(map).bindPopup(`<b>${st.n}</b><br>🔋 Bateria: ${st.b}%<br>${statusMsg}`);
+        });
 
-            if (!isBikeUnlocked) {
-                // DESBLOQUEAR
-                wrapper.classList.remove('bike-locked'); wrapper.classList.add('bike-unlocked');
-                icon.classList.remove('fa-lock'); icon.classList.add('fa-lock-open');
-                if(currentLang === 'eu') { title.innerText = "Desblokeatuta!"; desc.innerText = "Ondo ibili!"; btnText.innerText = "Itzuli (Blokeatu)"; }
-                else if(currentLang === 'es') { title.innerText = "¡Desbloqueada!"; desc.innerText = "¡Buen viaje!"; btnText.innerText = "Devolver (Bloquear)"; }
-                else { title.innerText = "Unlocked!"; desc.innerText = "Enjoy!"; btnText.innerText = "Return (Lock)"; }
-                btn.classList.remove('btn-green'); btn.classList.add('btn-red');
-                startTimer(); isBikeUnlocked = true;
-            } else {
-                // BLOQUEAR
-                wrapper.classList.remove('bike-unlocked'); wrapper.classList.add('bike-locked');
-                icon.classList.remove('fa-lock-open'); icon.classList.add('fa-lock');
-                if(currentLang === 'eu') { title.innerText = "Blokeatuta"; desc.innerText = "Eskaneatu QR erabiltzeko."; btnText.innerText = "Desblokeatu (Eskaneatu)"; }
-                else if(currentLang === 'es') { title.innerText = "Bloqueada"; desc.innerText = "Escanea QR para usar."; btnText.innerText = "Desbloquear (Escanear)"; }
-                else { title.innerText = "Locked"; desc.innerText = "Scan QR to use."; btnText.innerText = "Unlock (Scan)"; }
-                btn.classList.remove('btn-red'); btn.classList.add('btn-green');
-                stopTimer(); isBikeUnlocked = false;
-                alert(currentLang === 'eu' ? "Bizikleta ondo itzuli da." : "Bicicleta devuelta.");
-            }
-        }
-        function startTimer() { let s=0; document.getElementById('usageTimer').innerText="00:00:00"; timerInterval=setInterval(()=>{s++;const d=new Date(s*1000);document.getElementById('usageTimer').innerText=d.toISOString().substr(11,8);},1000); }
-        function stopTimer() { clearInterval(timerInterval); document.getElementById('usageTimer').innerText="00:00:00"; }
+        // --- FUNCIONES GENERALES ---
+        function doLogin() { document.getElementById('login-wrapper').classList.remove('active'); document.getElementById('profile-wrapper').classList.add('active'); document.getElementById('header-title').innerText = "Kaixo, Markel!"; }
+        function doLogout() { document.getElementById('login-wrapper').classList.add('active'); document.getElementById('profile-wrapper').classList.remove('active'); document.getElementById('header-title').innerText = "Ongi etorri!"; switchTab('home', document.getElementById('nav-home')); }
+        
+        let isDark=false; function toggleDarkMode(){ isDark=!isDark; document.getElementById('mainFrame').classList.toggle('dark',isDark); document.body.classList.toggle('dark-mode',isDark); document.getElementById('darkModeIcon').className=isDark?'fas fa-toggle-on':'fas fa-toggle-off'; }
+        
+        let isW=false; function connectWifi(){ isW=!isW; const b=document.getElementById('wifiBtn'); const t=document.getElementById('txt-connect'); if(isW){b.classList.add('connecting');setTimeout(()=>{b.classList.remove('connecting');b.classList.add('connected');t.innerText="Konektatuta";t.style.color="white";},2000);}else{b.classList.remove('connected');t.innerText="Konektatu";t.style.color="var(--dark)";} }
+        
+        // BICI: VERDE (ABRIR) -> ROJO (CERRAR)
+        let isB=false,tI; function toggleBikeLock(){ isB=!isB; document.getElementById('bikeWrapper').className=isB?'bike-wrapper bike-unlocked':'bike-wrapper bike-locked'; document.getElementById('lockIcon').className=isB?'fas fa-lock-open lock-icon':'fas fa-lock lock-icon'; document.getElementById('txt-bike-status').innerText=isB?'Desblokeatuta!':'Blokeatuta'; document.getElementById('bikeBtn').className=isB?'action-btn btn-red':'action-btn btn-green'; document.getElementById('txt-bike-btn').innerText=isB?'Itzuli (Blokeatu)':'Desblokeatu'; if(isB)startTimer();else stopTimer(); }
+        function startTimer(){let s=0;document.getElementById('usageTimer').innerText="00:00:00";tI=setInterval(()=>{s++;document.getElementById('usageTimer').innerText=new Date(s*1000).toISOString().substr(11,8);},1000);}
+        function stopTimer(){clearInterval(tI);document.getElementById('usageTimer').innerText="00:00:00";}
 
-        // --- IDIOMAS ---
         let currentLang = 'eu';
         function setAppLang(lang, element) {
             currentLang = lang;
-            document.querySelectorAll('.lang-opt').forEach(el => el.classList.remove('active'));
-            element.classList.add('active');
-            
-            const t = {
-                eu: { h: "Kaixo, Markel!", con: "Konektatu", bs: "Blokeatuta", bd: "Eskaneatu QR erabiltzeko.", bb: "Desblokeatu (Eskaneatu)", set: "Ezarpenak", lang: "Hizkuntza", rew: "Sariak", ch: "Kargatzen... %85" },
-                es: { h: "¡Hola, Markel!", con: "Conectar", bs: "Bloqueada", bd: "Escanea QR para usar.", bb: "Desbloquear (Escanear)", set: "Ajustes", lang: "Idioma", rew: "Premios", ch: "Cargando... 85%" },
-                en: { h: "Hello, Markel!", con: "Connect", bs: "Locked", bd: "Scan QR to use.", bb: "Unlock (Scan)", set: "Settings", lang: "Language", rew: "Rewards", ch: "Charging... 85%" }
-            };
-
-            document.getElementById('header-title').innerText = t[lang].h;
-            document.getElementById('txt-settings-title').innerText = t[lang].set;
-            document.getElementById('txt-lang').innerText = t[lang].lang;
-            document.getElementById('txt-rewards-title').innerText = t[lang].rew;
-            
-            if(!isWifiConnected) document.getElementById('txt-connect').innerText = t[lang].con;
-            if(!isBikeUnlocked) {
-                document.getElementById('txt-bike-status').innerText = t[lang].bs;
-                document.getElementById('txt-bike-desc').innerText = t[lang].bd;
-                document.getElementById('txt-bike-btn').innerText = t[lang].bb;
-                document.getElementById('txt-charging').innerText = t[lang].ch;
-            }
+            document.querySelectorAll('.lang-opt').forEach(el => el.classList.remove('active')); element.classList.add('active');
+            // Aquí podrías añadir la lógica de textos si la necesitas, por ahora mantiene el diseño
         }
     </script>
 </body>
