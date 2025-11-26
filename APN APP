@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="eu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>APN Eco-App</title>
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#009B48">
+    <link rel="apple-touch-icon" href="https://i.imgur.com/XXsk6Hm.png">
+    <link rel="icon" type="image/png" href="https://i.imgur.com/XXsk6Hm.png">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <style>
+        /* --- ESTILO ECO-MINIMALISTA --- */
+        :root {
+            --primary: #009B48; --primary-dark: #007a38; --primary-light: #e0f7ea;
+            --danger: #e74c3c; --danger-light: #fadbd8;
+            --text-dark: #1f2937; --text-gray: #9ca3af; --bg-app: #ffffff; --white: #ffffff;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background-color: #eceff1; display: flex; justify-content: center; align-items: center; min-height: 100vh; color: var(--text-dark); margin: 0; }
+
+        .mobile-frame { width: 100%; height: 100vh; background: var(--bg-app); overflow: hidden; position: relative; display: flex; flex-direction: column; }
+        @media(min-width: 500px) { .mobile-frame { width: 375px; height: 812px; border-radius: 40px; box-shadow: 0 30px 60px rgba(0,155,72,0.15); border: 8px solid #fff; } }
+
+        /* HEADER */
+        .header { padding: 40px 25px 10px; display: flex; justify-content: space-between; align-items: center; background: white; z-index: 10; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
+        .header h1 { font-size: 1.2rem; font-weight: 800; letter-spacing: -0.5px; margin: 0; }
+        .points-badge { background: var(--primary-light); color: var(--primary); padding: 5px 12px; border-radius: 20px; font-weight: 800; font-size: 0.9rem; display: flex; align-items: center; gap: 5px; }
+
+        /* CONTENIDO */
+        .content-area { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 80px; position: relative; }
+        .screen { display: none; animation: fadeUp 0.4s ease; height: 100%; }
+        .screen.active { display: block; }
+
+        /* --- PANTALLA WIFI --- */
+        .wifi-wrapper { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 90%; text-align: center; }
+        .wifi-btn { width: 160px; height: 160px; border-radius: 50%; background: var(--white); box-shadow: 0 10px 30px rgba(0, 155, 72, 0.1); display: flex; justify-content: center; align-items: center; flex-direction: column; cursor: pointer; position: relative; transition: 0.4s; border: 4px solid var(--primary-light); }
+        .wifi-btn:active { transform: scale(0.95); }
+        .wifi-btn i { font-size: 3rem; color: var(--primary); margin-bottom: 5px; }
+        .wifi-btn.connected { background: var(--primary); border-color: var(--primary); box-shadow: 0 15px 40px rgba(0, 155, 72, 0.3); }
+        .wifi-btn.connected i, .wifi-btn.connected h3 { color: white; }
+        .wifi-btn.connecting { border-color: var(--primary); animation: pulse 1.5s infinite; }
+
+        /* --- PANTALLA SARIAK (PREMIOS) --- */
+        .level-card { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; border-radius: 20px; padding: 20px; margin-bottom: 25px; box-shadow: 0 10px 20px rgba(0,155,72,0.3); text-align: center; }
+        .progress-container { background: rgba(255,255,255,0.3); height: 8px; border-radius: 10px; margin: 15px 0; overflow: hidden; }
+        .progress-bar { background: white; height: 100%; width: 65%; border-radius: 10px; }
+        .reward-item { background: white; border-radius: 15px; padding: 15px; margin-bottom: 15px; display: flex; align-items: center; gap: 15px; border: 1px solid #f0f0f0; box-shadow: 0 5px 15px rgba(0,0,0,0.03); }
+        .reward-info { flex: 1; } .reward-info h3 { margin: 0; font-size: 1rem; } .reward-info p { margin: 5px 0 0; font-size: 0.8rem; color: var(--text-gray); }
+        .reward-btn { background: var(--primary); color: white; border: none; padding: 8px 15px; border-radius: 10px; font-weight: bold; font-size: 0.8rem; cursor: pointer; }
+        .reward-btn.locked { background: #e5e7eb; color: #9ca3af; cursor: not-allowed; }
+
+        /* --- PANTALLA BICI (NUEVA) --- */
+        .bike-wrapper { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 90%; text-align: center; transition: 0.3s; }
+        .lock-status-icon { font-size: 5rem; margin-bottom: 20px; transition: 0.3s; }
+        .bike-locked .lock-status-icon { color: var(--danger); }
+        .bike-unlocked .lock-status-icon { color: var(--primary); }
+        
+        .scan-qr-btn {
+            background: var(--text-dark); color: white; padding: 15px 30px; border-radius: 50px;
+            font-size: 1.1rem; font-weight: bold; display: flex; align-items: center; gap: 10px;
+            cursor: pointer; box-shadow: 0 10px 20px rgba(0,0,0,0.1); transition: 0.3s;
+        }
+        .scan-qr-btn:active { transform: scale(0.95); }
+        .bike-unlocked .scan-qr-btn { background: var(--danger); } /* Botón rojo para devolver */
+
+        .timer-box { margin-top: 30px; padding: 15px; background: var(--primary-light); border-radius: 15px; color: var(--primary-dark); font-weight: bold; opacity: 0; transition: 0.3s; }
+        .bike-unlocked .timer-box { opacity: 1; }
+
+        /* --- MENU INFERIOR --- */
+        .nav-bar { background: white; padding: 15px 30px; border-radius: 30px 30px 0 0; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 -5px 20px rgba(0,0,0,0.03); position: absolute; bottom: 0; width: 100%; z-index: 20; }
+        .nav-icon { font-size: 1.4rem; color: #d1d5db; cursor: pointer; transition: 0.3s; position: relative; }
+        .nav-icon.active { color: var(--primary); transform: translateY(-5px); }
+        .nav-icon.active::after { content: ''; position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); width: 5px; height: 5px; background: var(--primary); border-radius: 50%; }
+
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(0, 155, 72, 0.4); } 70% { box-shadow: 0 0 0 20px rgba(0, 155, 72, 0); } 100% { box-shadow: 0 0 0 0 rgba(0, 155, 72, 0); } }
+    </style>
+</head>
+<body>
+
+    <div class="mobile-frame">
+        <div class="header">
+            <h1>Kaixo, Markel!</h1>
+            <div class="points-badge"><i class="fas fa-leaf"></i> 12.5 kg CO2</div>
+        </div>
+
+        <div class="content-area">
+            <div id="screen-wifi" class="screen active">
+                <div class="wifi-wrapper">
+                    <div class="wifi-btn" id="wifiBtn" onclick="connectWifi()">
+                        <i class="fas fa-wifi"></i>
+                        <h3 id="wifiText" style="margin:0; font-weight:600; font-size:0.9rem; color: var(--text-dark);">Konektatu</h3>
+                    </div>
+                    <p style="margin-top:25px; color:#9ca3af; font-weight:600; font-size:0.9rem;">EKI Seat #04 • Usurbil</p>
+                </div>
+            </div>
+
+            <div id="screen-bike" class="screen">
+                <div id="bikeWrapper" class="bike-wrapper bike-locked">
+                    <i id="lockIcon" class="fas fa-lock lock-status-icon"></i>
+                    <h2 id="lockTitle" style="margin-bottom:10px;">Bizikleta Blokeatuta</h2>
+                    <p id="lockDesc" style="color:#666; margin-bottom:30px; font-size:0.9rem;">Eskaneatu HIRI Go puntuko QR kodea bizikleta erabiltzeko.</p>
+                    
+                    <div class="scan-qr-btn" onclick="toggleBikeLock()">
+                        <i class="fas fa-qrcode"></i> <span id="scanBtnText">Eskaneatu QR</span>
+                    </div>
+
+                    <div class="timer-box">
+                        <i class="fas fa-clock"></i> Erabilera denbora: <span id="usageTimer">00:00:00</span>
+                        <p style="font-size:0.7rem; margin-top:5px;">Gehienez: 24h</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="screen-rewards" class="screen">
+                <div class="level-card">
+                    <h2 style="margin:0; font-size:1.5rem;">Maila: Eco-Warrior</h2>
+                    <div class="progress-container"><div class="progress-bar"></div></div>
+                    <div style="display:flex; justify-content:space-between; font-size:0.8rem; font-weight:bold;"><span>12.5 kg</span><span>Helburua: 20 kg</span></div>
+                </div>
+                <h3 style="margin-bottom:15px; font-size:1.1rem;">Sariak Eskuragarri</h3>
+                <div class="reward-item"><div style="font-size:2rem; color:var(--primary); width:50px; text-align:center;"><i class="fas fa-star"></i></div><div class="reward-info"><h3>1 Hilabete Premium</h3><p>Coste: 10kg CO2</p></div><button class="reward-btn" onclick="redeem(this)">Trukatu</button></div>
+                <div class="reward-item"><div style="font-size:2rem; color:#333; width:50px; text-align:center;"><i class="fas fa-mobile-alt"></i></div><div class="reward-info"><h3>Sorteo iPhone 15</h3><p>Coste: 50kg CO2</p></div><button class="reward-btn locked"><i class="fas fa-lock"></i></button></div>
+            </div>
+
+            <div id="screen-map" class="screen" style="padding:0; border-radius:20px; overflow:hidden; height:100%;">
+                <div style="width:100%; height:100%; background:#e5e3df; display:flex; align-items:center; justify-content:center; position:relative;">
+                    <p style="color:#666; font-weight:bold;">Google Maps API Demo</p>
+                    <i class="fas fa-map-marker-alt" style="position:absolute; top:30%; left:40%; font-size:2.5rem; color:var(--primary);"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="nav-bar">
+            <i class="fas fa-bolt nav-icon active" onclick="switchTab('wifi', this)"></i>
+            <i class="fas fa-bicycle nav-icon" onclick="switchTab('bike', this)"></i> <i class="fas fa-gift nav-icon" onclick="switchTab('rewards', this)"></i>
+            <i class="fas fa-map-marked-alt nav-icon" onclick="switchTab('map', this)"></i>
+        </div>
+    </div>
+
+    <script>
+        // NAVEGACIÓN
+        function switchTab(screenId, element) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-icon').forEach(n => n.classList.remove('active'));
+            document.getElementById('screen-' + screenId).classList.add('active');
+            element.classList.add('active');
+        }
+
+        // WIFI
+        let isWifiConnected = false;
+        function connectWifi() {
+            const btn = document.getElementById('wifiBtn'); const text = document.getElementById('wifiText');
+            if (!isWifiConnected) {
+                btn.classList.add('connecting');
+                setTimeout(() => { btn.classList.remove('connecting'); btn.classList.add('connected'); text.innerText = "Konektatuta"; text.style.color = "white"; isWifiConnected = true; }, 2000);
+            } else {
+                btn.classList.remove('connected'); text.innerText = "Konektatu"; text.style.color = "var(--text-dark)"; isWifiConnected = false;
+            }
+        }
+
+        // PREMIOS
+        function redeem(btn) { btn.innerText = "Egina! ✅"; btn.style.background = "#333"; alert("Zorionak! Saria lortu duzu."); }
+
+        // --- LÓGICA DE BICI (HIRI GO) ---
+        let isBikeUnlocked = false; // Estado inicial: bloqueada
+
+        function toggleBikeLock() {
+            const wrapper = document.getElementById('bikeWrapper');
+            const icon = document.getElementById('lockIcon');
+            const title = document.getElementById('lockTitle');
+            const desc = document.getElementById('lockDesc');
+            const btnText = document.getElementById('scanBtnText');
+
+            if (!isBikeUnlocked) {
+                // ACCIÓN 1: DESBLOQUEAR (Simula escaneo inicial)
+                // Aquí iría la llamada a la cámara real en una app nativa
+                setTimeout(() => { // Simula un pequeño retardo de escaneo
+                    wrapper.classList.remove('bike-locked');
+                    wrapper.classList.add('bike-unlocked');
+                    icon.classList.remove('fa-lock');
+                    icon.classList.add('fa-lock-open');
+                    title.innerText = "Bizikleta Desblokeatuta!";
+                    desc.innerText = " Ondo ibili! Gogoratu 24h barru itzultzea.";
+                    btnText.innerText = "Itzuli Bizikleta (Eskaneatu)";
+                    startTimer();
+                    isBikeUnlocked = true;
+                    alert("QR Eskaneatuta: Bizikleta desblokeatu da.");
+                }, 500);
+            } else {
+                // ACCIÓN 2: BLOQUEAR/DEVOLVER (Simula segundo escaneo)
+                setTimeout(() => {
+                    wrapper.classList.remove('bike-unlocked');
+                    wrapper.classList.add('bike-locked');
+                    icon.classList.remove('fa-lock-open');
+                    icon.classList.add('fa-lock');
+                    title.innerText = "Bizikleta Blokeatuta";
+                    desc.innerText = "Eskaneatu HIRI Go puntuko QR kodea bizikleta erabiltzeko.";
+                    btnText.innerText = "Eskaneatu QR";
+                    stopTimer();
+                    isBikeUnlocked = false;
+                    alert("QR Eskaneatuta: Bizikleta ondo itzuli da. Eskerrik asko!");
+                }, 500);
+            }
+        }
+
+        // Temporizador simulado para la demo
+        let timerInterval;
+        let seconds = 0;
+        function startTimer() {
+            seconds = 0;
+            document.getElementById('usageTimer').innerText = "00:00:00";
+            timerInterval = setInterval(() => {
+                seconds++;
+                const date = new Date(seconds * 1000);
+                const timeStr = date.toISOString().substr(11, 8);
+                document.getElementById('usageTimer').innerText = timeStr;
+            }, 1000);
+        }
+        function stopTimer() {
+            clearInterval(timerInterval);
+            document.getElementById('usageTimer').innerText = "00:00:00";
+        }
+    </script>
+</body>
+</html>
