@@ -1,283 +1,485 @@
 <!DOCTYPE html>
-<html lang="eu">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>APN Eco-App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>APN System App</title>
     
+    <meta name="theme-color" content="#ffffff">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#009B48">
-    <link rel="apple-touch-icon" href="https://i.imgur.com/XXsk6Hm.png">
-    <link rel="icon" type="image/png" href="https://i.imgur.com/XXsk6Hm.png">
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
     <style>
-        /* --- ESTILOS --- */
+        /* --- 1. ESTILOS CORE --- */
         :root {
-            --primary: #009B48; --primary-light: #e0f7ea;
-            --danger: #e74c3c; --warning: #f1c40f; --success: #2ecc71;
-            --bg-light: #f3f4f6; --bg-dark: #111827;
-            --card-light: #ffffff; --card-dark: #1f2937;
-            --text-light: #1f2937; --text-dark: #f9fafb; --text-gray: #9ca3af;
+            --primary: #00e676; --primary-dark: #00a854; --accent: #2979ff;
+            --bg: #f2f4f8; --surface: #ffffff; --text: #1d1d1f; --gray: #86868b;
+            --glass: rgba(255, 255, 255, 0.95);
+            --shadow: 0 8px 30px rgba(0,0,0,0.08);
+            --radius: 24px;
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; -webkit-tap-highlight-color: transparent; transition: background-color 0.3s, color 0.3s; }
-        body { background-color: #e5e5e5; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-
-        /* MODO OSCURO */
-        .dark-mode { background-color: #000 !important; }
-        .mobile-frame.dark { background: var(--bg-dark); color: var(--text-dark); border-color: #333; }
-        .mobile-frame.dark .header, .mobile-frame.dark .nav-bar, .mobile-frame.dark .settings-list, .mobile-frame.dark .reward-item, .mobile-frame.dark .profile-summary-card, .mobile-frame.dark .activity-item, .mobile-frame.dark .login-input { background: var(--card-dark); color: var(--text-dark); border-color: #374151; }
-        .mobile-frame.dark .wifi-btn { background: var(--card-dark); border-color: #374151; box-shadow: none; }
-        .mobile-frame.dark .wifi-btn h3, .mobile-frame.dark .settings-item span, .mobile-frame.dark .activity-item h4 { color: var(--text-dark); }
-        .mobile-frame.dark .settings-btn, .mobile-frame.dark .nav-icon { color: #4b5563; }
-        .mobile-frame.dark .nav-icon.active { color: var(--primary); }
-        .mobile-frame.dark .leaflet-popup-content-wrapper { background: var(--card-dark); color: var(--text-dark); }
-        .mobile-frame.dark .leaflet-popup-tip { background: var(--card-dark); }
-        .mobile-frame.dark .leaflet-popup-content h3 { color: var(--text-dark) !important; }
-
-        /* MARCO MOVIL */
-        .mobile-frame { width: 100%; height: 100vh; background: var(--bg-light); overflow: hidden; position: relative; display: flex; flex-direction: column; color: var(--text-light); }
-        @media(min-width: 500px) { .mobile-frame { width: 375px; height: 812px; border-radius: 40px; box-shadow: 0 30px 60px rgba(0,155,72,0.15); border: 8px solid #fff; } }
-
-        /* HEADER */
-        .header { padding: 40px 25px 15px; display: flex; justify-content: space-between; align-items: center; background: var(--card-light); z-index: 10; box-shadow: 0 2px 10px rgba(0,0,0,0.03); }
-        .header h1 { font-size: 1.3rem; font-weight: 800; margin: 0; }
-        .settings-btn { font-size: 1.5rem; cursor: pointer; transition: 0.3s; }
-
-        /* CONTENIDO */
-        .content-area { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 90px; position: relative; }
-        .screen { display: none; animation: fadeIn 0.3s ease; height: 100%; width: 100%; }
-        .screen.active { display: block; }
-
-        /* --- MAPA --- */
-        #map { height: 100%; width: 100%; border-radius: 20px; z-index: 1; }
-        .custom-pin {
-            background-color: white; border-radius: 50%; border: 3px solid white;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.3); text-align: center; display: flex;
-            justify-content: center; align-items: center; font-size: 1.2rem; color: white;
+        body.dark-mode {
+            --bg: #000000; --surface: #1c1c1e; --text: #f5f5f7; --gray: #a1a1a6;
+            --glass: rgba(28, 28, 30, 0.95);
         }
-        .pin-red { background-color: var(--danger); animation: pulse-red 2s infinite; }
-        .pin-yellow { background-color: var(--warning); }
-        .pin-green { background-color: var(--success); }
-        .leaflet-popup-content h3 { margin: 0 0 5px; font-size: 1rem; color: var(--text-light); }
-        .leaflet-popup-content p { margin: 3px 0; font-size: 0.85rem; }
-
-        /* --- PANTALLAS --- */
-        /* WiFi & Bici */
-        .wifi-wrapper, .bike-wrapper { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 90%; text-align: center; }
-        .wifi-btn { width: 160px; height: 160px; border-radius: 50%; background: var(--card-light); box-shadow: 0 10px 30px rgba(0, 155, 72, 0.1); display: flex; justify-content: center; align-items: center; flex-direction: column; cursor: pointer; position: relative; transition: 0.4s; border: 4px solid var(--primary-light); }
-        .wifi-btn.connected { background: var(--primary)!important; border-color: var(--primary)!important; } .wifi-btn.connected i, .wifi-btn.connected h3 { color: white!important; } .wifi-btn.connecting { border-color: var(--primary); animation: pulse 1.5s infinite; }
-        .wifi-btn i { font-size: 3rem; color: var(--primary); margin-bottom: 5px; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
         
-        .bike-wrapper i.lock-icon { font-size: 5rem; margin-bottom: 20px; transition: 0.3s; }
-        .bike-locked .lock-icon { color: var(--danger); } .bike-unlocked .lock-icon { color: var(--primary); }
-        .action-btn { padding: 15px 30px; border-radius: 50px; font-size: 1.1rem; font-weight: bold; display: flex; align-items: center; gap: 10px; cursor: pointer; box-shadow: 0 10px 20px rgba(0,0,0,0.1); transition: 0.3s; color: white; border: none; width: 90%; justify-content: center; }
-        .btn-green { background: var(--primary); } .btn-red { background: var(--danger); }
-        .timer-box { margin-top: 30px; padding: 15px; background: var(--primary-light); border-radius: 15px; color: var(--primary); font-weight: bold; opacity: 0; width: 80%; } .bike-unlocked .timer-box { opacity: 1; }
-        .charging-status { margin-top: 10px; font-size: 0.9rem; font-weight: bold; color: var(--primary); display: flex; align-items: center; gap: 5px; opacity: 0; transition: 0.3s; }
-        .bike-locked .charging-status { opacity: 1; }
+        body { margin: 0; background: var(--bg); height: 100vh; width: 100vw; overflow: hidden; display: flex; flex-direction: column; transition: background 0.3s; }
 
-        /* Premios (ARREGLADO) */
-        .level-card { background: linear-gradient(135deg, var(--primary), #007a38); color: white; border-radius: 20px; padding: 20px; margin-bottom: 25px; box-shadow: 0 10px 20px rgba(0,155,72,0.3); text-align: center; }
-        .progress-bar { background: rgba(255,255,255,0.3); height: 8px; border-radius: 10px; margin: 15px 0; overflow: hidden; position: relative; }
-        .progress-fill { background: white; height: 100%; width: 65%; border-radius: 10px; }
-        /* Estilo corregido para items de premios */
-        .reward-item { background: var(--card-light); border-radius: 15px; padding: 15px; margin-bottom: 15px; display: flex; align-items: center; gap: 15px; border: 1px solid #eee; }
-        .mobile-frame.dark .reward-item { border-color: #374151; }
-        .reward-icon { width: 50px; height: 50px; background: var(--primary-light); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--primary); font-size: 1.5rem; }
-        .reward-info { flex: 1; } .reward-info h3 { margin: 0; font-size: 1rem; } .reward-info p { margin: 5px 0 0; font-size: 0.8rem; color: var(--text-gray); }
-        .reward-btn { background: var(--primary); color: white; border: none; padding: 8px 15px; border-radius: 10px; font-weight: bold; cursor: pointer; }
-        .reward-btn.locked { background: #eee; color: #999; cursor: not-allowed; }
-        .mobile-frame.dark .reward-btn.locked { background: #4b5563; color: #9ca3af; }
+        /* HEADER FIJO */
+        header {
+            height: 60px; width: 100%; z-index: 1000;
+            display: flex; justify-content: space-between; align-items: center; padding: 0 20px;
+            background: var(--glass); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(0,0,0,0.05);
+            padding-top: env(safe-area-inset-top); flex-shrink: 0;
+        }
+        .logo { font-weight: 900; font-size: 1.2rem; display: flex; align-items: center; gap: 8px; color: var(--text); }
+        .lvl-badge { background: rgba(0,0,0,0.05); padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; color: var(--text); border: 1px solid rgba(0,0,0,0.1); }
 
-        /* Login & Perfil */
-        .login-wrapper, .profile-wrapper { height: 100%; display: none; flex-direction: column; }
-        .login-wrapper.active, .profile-wrapper.active { display: flex; }
-        .login-wrapper { justify-content: center; align-items: center; text-align: center; }
-        .login-input { width: 100%; padding: 15px; margin-bottom: 15px; border: 1px solid #eee; border-radius: 10px; background: white; }
-        .profile-summary-card { background: white; border-radius: 20px; padding: 20px; display: flex; justify-content: space-around; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-bottom: 25px; }
-        .summary-val { font-size: 1.5rem; font-weight: 800; color: var(--primary); }
+        /* MAIN SCROLLABLE AREA */
+        main {
+            flex-grow: 1; overflow-y: auto; overflow-x: hidden; padding: 20px; padding-bottom: 90px; /* Espacio extra abajo */
+            scroll-behavior: smooth; position: relative; z-index: 1;
+        }
+        main::-webkit-scrollbar { display: none; }
+
+        /* NAVBAR FIJA (ARREGLADA) */
+        nav {
+            height: 80px; width: 100%; z-index: 2000; /* Z-Index alto para estar encima de todo */
+            background: var(--surface); border-top: 1px solid rgba(0,0,0,0.05);
+            display: flex; justify-content: space-around; align-items: flex-start; padding-top: 12px;
+            padding-bottom: env(safe-area-inset-bottom);
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.05); flex-shrink: 0;
+        }
+        .nav-item { 
+            color: var(--gray); font-size: 0.7rem; text-align: center; width: 20%; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            transition: 0.2s; cursor: pointer; text-decoration: none;
+        }
+        .nav-item.active { color: var(--primary-dark); transform: translateY(-2px); font-weight: bold; }
+        .nav-item i { font-size: 1.5rem; margin-bottom: 4px; }
+
+        /* COMPONENTES */
+        .card { background: var(--surface); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); margin-bottom: 20px; color: var(--text); position: relative; overflow: hidden; transition: 0.2s; }
+        .card:active { transform: scale(0.99); }
         
-        /* Ajustes & Menu */
-        .settings-list { list-style: none; padding: 0; background: var(--card-light); border-radius: 15px; overflow: hidden; }
-        .settings-item { padding: 20px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
-        .mobile-frame.dark .settings-item { border-color: #374151; }
-        .nav-bar { background: var(--card-light); padding: 15px 25px; border-radius: 30px 30px 0 0; display:flex; justify-content: space-between; align-items: center; box-shadow: 0 -5px 20px rgba(0,0,0,0.03); position: absolute; bottom: 0; width: 100%; z-index: 20; }
-        .nav-icon { font-size: 1.4rem; color: #d1d5db; cursor: pointer; transition: 0.3s; }
-        .nav-icon.active { color: var(--primary); transform: translateY(-5px); }
+        .btn {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white; border: none; padding: 16px; border-radius: 18px; width: 100%;
+            font-weight: 700; font-size: 1rem; cursor: pointer; box-shadow: 0 8px 20px rgba(0, 230, 118, 0.3);
+            display: flex; justify-content: center; align-items: center; gap: 10px; transition: 0.2s; margin-top: 10px;
+        }
+        .btn:active { transform: scale(0.95); }
 
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(0, 155, 72, 0.4); } 70% { box-shadow: 0 0 0 20px rgba(0, 155, 72, 0); } 100% { box-shadow: 0 0 0 0 rgba(0, 155, 72, 0); } }
-        @keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(231, 76, 60, 0); } 100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); } }
+        /* VISTAS */
+        .view { display: none; animation: fadeIn 0.3s ease-out; width: 100%; }
+        .view.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* HOME ELEMENTS */
+        .welcome-hero { background: linear-gradient(135deg, #111, #2d3436); color: white; display: flex; justify-content: space-between; align-items: center; }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; }
+        .stat-box { background: var(--surface); padding: 20px; border-radius: 24px; text-align: center; box-shadow: var(--shadow); cursor: pointer; }
+        .stat-num { font-size: 1.6rem; font-weight: 900; color: var(--text); margin-top: 5px; }
+
+        /* WIDGET CLIMA SOLAR */
+        .weather-widget { background: linear-gradient(135deg, #FF9800, #FF5722); color: white; display: flex; justify-content: space-between; align-items: center; }
+        
+        /* RANKING */
+        .rank-row { display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(0,0,0,0.05); }
+        .rank-num { font-weight: 900; font-size: 1.2rem; width: 30px; color: var(--gray); }
+        .rank-1 { color: #FFD700; font-size: 1.5rem; }
+        .rank-name { flex-grow: 1; font-weight: bold; font-size: 0.9rem; }
+        .rank-pts { font-weight: 800; color: var(--primary-dark); }
+
+        /* SHOP GRID */
+        .shop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .product-card { background: var(--surface); border-radius: 20px; overflow: hidden; box-shadow: var(--shadow); display: flex; flex-direction: column; }
+        .product-img { width: 100%; height: 120px; object-fit: contain; padding: 15px; background: #fff; }
+        .p-details { padding: 12px; }
+        .p-cat { font-size: 0.65rem; font-weight: 800; color: var(--gray); text-transform: uppercase; }
+        .p-title { font-weight: 700; font-size: 0.85rem; color: var(--text); margin: 4px 0; line-height: 1.2; }
+        .p-price { color: var(--primary-dark); font-weight: 800; font-size: 0.9rem; }
+        .p-raffle { color: #e91e63; }
+        .locked { filter: grayscale(1); opacity: 0.6; pointer-events: none; }
+        .lock-badge { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.7); color: white; padding: 4px 8px; border-radius: 10px; font-size: 0.7rem; font-weight: bold; }
+
+        /* PERFIL & GRÁFICO */
+        .tree-stage { width: 180px; height: 180px; object-fit: contain; filter: drop-shadow(0 15px 30px rgba(0,0,0,0.15)); animation: float 3s infinite ease-in-out; }
+        @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+        
+        .chart-container { display: flex; justify-content: space-between; align-items: flex-end; height: 100px; padding: 10px 0; margin-top: 15px; }
+        .bar-group { width: 12%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; }
+        .bar { width: 100%; background: #eee; border-radius: 5px; position: relative; overflow: hidden; height: 100%; }
+        .bar-fill { background: var(--primary); position: absolute; bottom: 0; width: 100%; border-radius: 5px; transition: height 1s; }
+        .bar-label { font-size: 0.6rem; color: var(--gray); margin-top: 5px; text-align: center; }
+
+        /* EXTRA UI */
+        .fab-support { position: fixed; bottom: 100px; right: 20px; width: 50px; height: 50px; background: var(--accent); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 20px rgba(41,121,255,0.4); z-index: 100; cursor: pointer; }
+        .fab-report { position: absolute; bottom: 20px; right: 20px; width: 50px; height: 50px; background: #ff3b30; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 15px rgba(255, 59, 48, 0.4); z-index: 500; font-size: 1.2rem; cursor: pointer; }
+        
+        /* OFFLINE & LOGIN */
+        #offline-alert { display: none; background: #ff3b30; color: white; text-align: center; padding: 5px; font-size: 0.8rem; font-weight: bold; position: fixed; top: 0; width: 100%; z-index: 2000; }
+        #login-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: var(--bg); z-index: 9999; display: flex; flex-direction: column; justify-content: center; padding: 30px; text-align: center; }
+        .input-glass { background: var(--surface); border: none; padding: 18px; border-radius: 15px; margin-bottom: 15px; width: 100%; font-size: 1rem; outline: none; color: var(--text); box-shadow: inset 0 2px 5px rgba(0,0,0,0.05); }
+
+        /* MAPA */
+        #map { height: 100%; width: 100%; }
+        .map-wrapper { height: 60vh; border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); position: relative; }
+
     </style>
 </head>
 <body>
 
-    <div class="mobile-frame" id="mainFrame">
-        
-        <div class="header">
-            <h1 id="header-title">Ongi etorri!</h1>
-            <i class="fas fa-cog settings-btn" onclick="switchTab('settings', this)"></i>
+    <audio id="snd-click" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3"></audio>
+    <audio id="snd-success" src="https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3"></audio>
+
+    <div id="offline-alert">Sin conexión a Internet</div>
+
+    <div id="login-overlay">
+        <div class="animate__animated animate__fadeInUp">
+            <img src="https://i.imgur.com/XXsk6Hm.png" style="width:100px; margin-bottom:20px;">
+            <h1 style="color:var(--text); margin-bottom:5px;">APN System</h1>
+            <p style="color:var(--gray); margin-bottom:40px;">Energía limpia, premios reales.</p>
+            <input type="text" id="login-user" class="input-glass" placeholder="Tu Nombre">
+            <button class="btn" onclick="login()">Sartu / Entrar</button>
         </div>
-
-        <div class="content-area">
-            
-            <div id="screen-home" class="screen active">
-                <div id="login-wrapper" class="login-wrapper active">
-                    <img src="https://i.imgur.com/XXsk6Hm.png" style="height: 80px; margin-bottom:20px;">
-                    <h2 style="color:var(--primary);">APN System</h2>
-                    <input type="email" class="login-input" placeholder="Posta / Email">
-                    <input type="password" class="login-input" placeholder="Pasahitza">
-                    <button class="action-btn btn-green" onclick="doLogin()">Sartu</button>
-                </div>
-                <div id="profile-wrapper" class="profile-wrapper">
-                    <div style="text-align:center; margin-bottom:20px;">
-                        <img src="https://ui-avatars.com/api/?name=Markel+Tamayo&background=009B48&color=fff&size=200" style="width:100px; border-radius:50%; border:4px solid var(--primary);">
-                        <h2 style="margin:10px 0;">Markel Tamayo</h2>
-                        <span style="background:var(--primary-light); color:var(--primary); padding:5px 15px; border-radius:20px; font-weight:bold; font-size:0.8rem;">Eco-Warrior Nvl. 3</span>
-                    </div>
-                    <div class="profile-summary-card">
-                        <div style="text-align:center;"><div class="summary-val">12.5</div><div style="font-size:0.8rem;">kg CO2</div></div>
-                        <div style="text-align:center;"><div class="summary-val">42</div><div style="font-size:0.8rem;">Ordu</div></div>
-                        <div style="text-align:center;"><div class="summary-val">150</div><div style="font-size:0.8rem;">Puntu</div></div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="screen-wifi" class="screen"><div class="wifi-wrapper"><div class="wifi-btn" id="wifiBtn" onclick="connectWifi()"><i class="fas fa-wifi"></i><h3 id="txt-connect">Konektatu</h3></div><p style="margin-top:25px; color:var(--text-gray);">EKI Seat #04 • Usurbil</p></div></div>
-            
-            <div id="screen-bike" class="screen"><div id="bikeWrapper" class="bike-wrapper bike-locked"><i id="lockIcon" class="fas fa-lock lock-icon"></i><h2 id="txt-bike-status" style="margin-bottom:5px;">Blokeatuta</h2><div class="charging-status"><i class="fas fa-bolt"></i> <span>Kargatzen... %85</span></div><p id="txt-bike-desc" style="color:var(--text-gray); margin-bottom:30px; margin-top:10px; font-size:0.9rem;">Eskaneatu QR erabiltzeko.</p><button id="bikeBtn" class="action-btn btn-green" onclick="toggleBikeLock()"><i class="fas fa-qrcode"></i> <span id="txt-bike-btn">Desblokeatu</span></button><div class="timer-box"><i class="fas fa-clock"></i> <span id="usageTimer">00:00:00</span></div></div></div>
-            
-            <div id="screen-map" class="screen" style="padding:0; border-radius:20px; overflow:hidden;"><div id="map"></div></div>
-            
-            <div id="screen-rewards" class="screen">
-                <div class="level-card">
-                    <h2 style="margin:0;">Eco-Warrior</h2>
-                    <div class="progress-bar"><div class="progress-fill"></div></div>
-                    <div style="display:flex; justify-content:space-between; font-size:0.8rem;"><span>12.5 kg</span><span>20 kg</span></div>
-                </div>
-                <h3 id="txt-rewards-title">Sariak</h3>
-                
-                <div class="reward-item">
-                    <div class="reward-icon"><i class="fas fa-star"></i></div>
-                    <div class="reward-info"><h3>1 Hilabete Premium</h3><p>10kg CO2</p></div>
-                    <button class="reward-btn" onclick="alert('Zorionak!')">Trukatu</button>
-                </div>
-                <div class="reward-item">
-                    <div class="reward-icon" style="background:#f3f4f6; color:#333;"><i class="fas fa-mobile-alt"></i></div>
-                    <div class="reward-info"><h3>iPhone 15</h3><p>50kg CO2</p></div>
-                    <button class="reward-btn locked"><i class="fas fa-lock"></i></button>
-                </div>
-                <div class="reward-item">
-                    <div class="reward-icon" style="background:#f3f4f6; color:#666;"><i class="fas fa-laptop"></i></div>
-                    <div class="reward-info"><h3>MacBook Air</h3><p>100kg CO2</p></div>
-                    <button class="reward-btn locked"><i class="fas fa-lock"></i></button>
-                </div>
-            </div>
-
-            <div id="screen-settings" class="screen">
-                <h3 style="margin-bottom:15px; color:var(--primary);">Ezarpenak</h3>
-                <ul class="settings-list">
-                    <li class="settings-item"><span><i class="fas fa-globe"></i> Hizkuntza</span><div class="lang-options"><div class="lang-opt active" onclick="setAppLang('eu', this)">EU</div><div class="lang-opt" onclick="setAppLang('es', this)">ES</div><div class="lang-opt" onclick="setAppLang('en', this)">EN</div></div></li>
-                    <li class="settings-item"><span><i class="fas fa-moon"></i> Dark Mode</span><i class="fas fa-toggle-off" id="darkModeIcon" onclick="toggleDarkMode()" style="font-size:1.5rem; color:#ccc; cursor:pointer;"></i></li>
-                </ul>
-                <div style="text-align:center; margin-top:30px;">
-                    <button class="action-btn btn-red" style="width:100%;" onclick="doLogout()"><i class="fas fa-sign-out-alt"></i> Saioa itxi</button>
-                    <p style="color:var(--text-gray); font-size:0.8rem; margin-top:20px;">APN App v9.0 Final</p>
-                </div>
-            </div>
-
-        </div>
-
-        <div class="nav-bar">
-            <i class="fas fa-home nav-icon active" id="nav-home" onclick="switchTab('home', this)"></i>
-            <i class="fas fa-bolt nav-icon" id="nav-wifi" onclick="switchTab('wifi', this)"></i>
-            <i class="fas fa-bicycle nav-icon" id="nav-bike" onclick="switchTab('bike', this)"></i>
-            <i class="fas fa-gift nav-icon" id="nav-rewards" onclick="switchTab('rewards', this)"></i>
-            <i class="fas fa-map-marked-alt nav-icon" id="nav-map" onclick="switchTab('map', this)"></i>
-        </div>
-
     </div>
 
+    <header>
+        <div class="logo">
+            <img src="https://i.imgur.com/XXsk6Hm.png" style="height:32px;"> APN
+        </div>
+        <div style="display:flex; gap:15px; align-items:center;">
+            <i class="fas fa-bell" style="color:var(--text); font-size:1.2rem;" onclick="showNotif()"></i>
+            <div class="lvl-badge" id="header-lvl">Lvl 1</div>
+        </div>
+    </header>
+
+    <main>
+        
+        <div id="view-home" class="view active">
+            <div class="card welcome-hero">
+                <div>
+                    <h2 id="welcome-txt" style="margin:0;">Kaixo!</h2>
+                    <p style="margin:5px 0 0 0; opacity:0.8;">Tu energía mueve la ciudad.</p>
+                </div>
+                <div style="font-size:2.5rem;">🌱</div>
+            </div>
+
+            <button id="btn-bonus" class="btn" style="background: linear-gradient(135deg, #FFC107, #FF9800); margin-bottom: 20px; margin-top:0;" onclick="claimBonus()">
+                🎁 Bonus Diario (+20 XP)
+            </button>
+
+            <div class="card weather-widget">
+                <div>
+                    <div style="font-weight:bold; font-size:0.8rem; opacity:0.9;">GIPUZKOA SOLAR</div>
+                    <div style="font-size:1.8rem; font-weight:800;">☀ 24°C</div>
+                    <div style="font-size:0.8rem;">Eficiencia Carga: 100%</div>
+                </div>
+                <i class="fas fa-plug" style="font-size:2.5rem; opacity:0.8;"></i>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-box" onclick="showImpact()">
+                    <i class="fas fa-leaf" style="color:var(--primary); font-size:1.5rem;"></i>
+                    <div class="stat-num" id="val-co2">0</div>
+                    <div style="font-size:0.7rem; color:var(--gray); font-weight:bold;">KG CO2 (Info)</div>
+                </div>
+                <div class="stat-box">
+                    <i class="fas fa-bolt" style="color:#ffb300; font-size:1.5rem;"></i>
+                    <div class="stat-num" id="val-xp">0</div>
+                    <div style="font-size:0.7rem; color:var(--gray); font-weight:bold;">XP TOTAL</div>
+                </div>
+            </div>
+
+            <h3 style="margin: 25px 0 10px 0; color:var(--text);">Top Ecos Gipuzkoa 🏆</h3>
+            <div class="card" style="padding:10px 20px;">
+                <div class="rank-row">
+                    <div class="rank-num rank-1">1</div>
+                    <div class="rank-name">Ane M.</div>
+                    <div class="rank-pts">5400</div>
+                </div>
+                <div class="rank-row">
+                    <div class="rank-num">2</div>
+                    <div class="rank-name">Jon K.</div>
+                    <div class="rank-pts">4200</div>
+                </div>
+                <div class="rank-row" style="border:none;">
+                    <div class="rank-num">3</div>
+                    <div class="rank-name">Mikel L.</div>
+                    <div class="rank-pts">3800</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-map" class="view">
+            <h2 style="margin-bottom:15px; color:var(--text);">Mapa en Vivo</h2>
+            <div class="map-wrapper">
+                <div id="map"></div>
+                <div class="fab-report" onclick="report()"><i class="fas fa-wrench"></i></div>
+            </div>
+            <p style="text-align:center; font-size:0.8rem; color:var(--gray); margin-top:10px;">🟢 Disponible | 🟠 Ocupado | 🔴 Avería</p>
+        </div>
+
+        <div id="view-scan" class="view">
+            <div class="card" style="height:60vh; background:#000; display:flex; justify-content:center; align-items:center; position:relative; border:none;">
+                <i class="fas fa-qrcode" style="font-size:10rem; color:rgba(255,255,255,0.1);"></i>
+                <div style="position:absolute; width:80%; height:2px; background:var(--primary); box-shadow:0 0 20px var(--primary); animation:scan 2s infinite ease-in-out;"></div>
+                <style>@keyframes scan { 0%,100%{top:20%} 50%{top:80%} }</style>
+            </div>
+            <button class="btn" onclick="simulateScan()"><i class="fas fa-camera"></i> Escanear (+50 XP)</button>
+        </div>
+
+        <div id="view-shop" class="view">
+            <div class="card" style="background:linear-gradient(135deg, #FFC107, #FF9800); color:black; display:flex; justify-content:space-between; align-items:center;">
+                <div><h1 style="margin:0; font-size:2.2rem;" id="shop-pts">0</h1><small style="font-weight:bold;">TUS PUNTOS</small></div>
+                <i class="fas fa-gift" style="font-size:3rem; opacity:0.3;"></i>
+            </div>
+            
+            <h3 style="margin-bottom:15px; color:var(--text);">Canjear Premios</h3>
+            <div class="shop-grid">
+                <div class="product-card" onclick="redeem('Mugi')">
+                    <div class="product-img"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS1GEaLx8SKGsJ8N00MMxTCaaX27B273yB2wA&s" style="width:100%; height:100%; object-fit:contain;"></div>
+                    <div class="p-details"><div class="p-cat">Transporte</div><div class="p-title">Mugi 5€</div><div class="p-price">200 XP</div></div>
+                </div>
+                <div class="product-card" onclick="redeem('Spotify')">
+                    <div class="product-img"><img src="https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg" style="width:100%; height:100%; object-fit:contain;"></div>
+                    <div class="p-details"><div class="p-cat">Música</div><div class="p-title">1 Mes Premium</div><div class="p-price">300 XP</div></div>
+                </div>
+                <div class="product-card locked" id="item-netflix">
+                    <div class="lock-badge">Lvl 5</div>
+                    <div class="product-img"><img src="https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg" style="width:100%; height:100%; object-fit:contain;"></div>
+                    <div class="p-details"><div class="p-cat">Streaming</div><div class="p-title">Tarjeta Regalo</div><div class="p-price">500 XP</div></div>
+                </div>
+                <div class="product-card locked" id="item-zara">
+                    <div class="lock-badge">Lvl 10</div>
+                    <div class="product-img"><img src="https://upload.wikimedia.org/wikipedia/commons/f/fd/Zara_Logo.svg" style="width:100%; height:100%; object-fit:contain;"></div>
+                    <div class="p-details"><div class="p-cat">Moda</div><div class="p-title">Zara -20% Dto</div><div class="p-price">500 XP</div></div>
+                </div>
+                <div class="product-card locked" id="item-nike">
+                    <div class="lock-badge">Lvl 20</div>
+                    <div class="product-img"><img src="https://upload.wikimedia.org/wikipedia/commons/a/a6/Logo_NIKE.svg" style="width:100%; height:100%; object-fit:contain;"></div>
+                    <div class="p-details"><div class="p-cat">Deporte</div><div class="p-title">Nike -15% Dto</div><div class="p-price">800 XP</div></div>
+                </div>
+                <div class="product-card locked" id="item-apple">
+                    <div class="lock-badge">Lvl 50</div>
+                    <div class="product-img"><img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" style="width:100%; height:100%; object-fit:contain;"></div>
+                    <div class="p-details"><div class="p-cat">SORTEO</div><div class="p-title">iPhone 15 Pro</div><div class="p-price p-raffle">Ticket: 100 XP</div></div>
+                </div>
+                <div class="product-card locked" id="item-ps5">
+                    <div class="lock-badge">Lvl 50</div>
+                    <div class="product-img"><img src="https://upload.wikimedia.org/wikipedia/commons/0/00/PlayStation_logo.svg" style="width:100%; height:100%; object-fit:contain;"></div>
+                    <div class="p-details"><div class="p-cat">SORTEO</div><div class="p-title">Sony PS5</div><div class="p-price p-raffle">Ticket: 100 XP</div></div>
+                </div>
+                <div class="product-card locked" id="item-tesla">
+                    <div class="lock-badge">Lvl 100</div>
+                    <div class="product-img"><img src="https://upload.wikimedia.org/wikipedia/commons/e/e8/Tesla_logo.png" style="width:100%; height:100%; object-fit:contain;"></div>
+                    <div class="p-details"><div class="p-cat">MEGA SORTEO</div><div class="p-title">Tesla Model 3</div><div class="p-price p-raffle">Ticket: 500 XP</div></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-profile" class="view">
+            <h2 style="margin-bottom:15px; color:var(--text);">Mi Evolución</h2>
+            
+            <div class="card" style="text-align:center; padding:30px 20px; background: linear-gradient(to bottom, #e0f7fa, #ffffff);">
+                <h3 id="tree-title" style="color:var(--primary-dark); margin-bottom:5px;">Semilla</h3>
+                <p style="color:var(--gray); font-size:0.8rem; margin-bottom:30px;">Tu progreso sostenible</p>
+                <img id="tree-img" src="" class="tree-stage">
+                <div style="background:#eee; height:8px; border-radius:10px; margin-top:20px; overflow:hidden;"><div id="xp-bar" style="height:100%; background:var(--primary); width:0%;"></div></div>
+                <p style="font-weight:bold; color:var(--text); margin-top:5px;" id="xp-text">0 / 100 XP</p>
+            </div>
+
+            <div class="card">
+                <h3 style="margin:0 0 15px 0; font-size:1rem;">Actividad Semanal</h3>
+                <div class="chart-container">
+                    <div class="bar-group"><div class="bar"><div class="bar-fill" style="height:30%;"></div></div><span class="bar-label">L</span></div>
+                    <div class="bar-group"><div class="bar"><div class="bar-fill" style="height:50%;"></div></div><span class="bar-label">M</span></div>
+                    <div class="bar-group"><div class="bar"><div class="bar-fill" style="height:20%;"></div></div><span class="bar-label">X</span></div>
+                    <div class="bar-group"><div class="bar"><div class="bar-fill" style="height:80%;"></div></div><span class="bar-label">J</span></div>
+                    <div class="bar-group"><div class="bar"><div class="bar-fill" style="height:60%;"></div></div><span class="bar-label">V</span></div>
+                    <div class="bar-group"><div class="bar"><div class="bar-fill" style="height:90%;"></div></div><span class="bar-label">S</span></div>
+                    <div class="bar-group"><div class="bar"><div class="bar-fill" style="height:40%;"></div></div><span class="bar-label">D</span></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                    <span>Idioma</span>
+                    <select onchange="changeLang(this.value)" style="border:none; background:var(--bg); padding:5px; border-radius:5px;">
+                        <option value="es">Español</option><option value="eu">Euskara</option><option value="en">English</option>
+                    </select>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span>Modo Oscuro</span>
+                    <input type="checkbox" onchange="toggleDark()">
+                </div>
+            </div>
+            <button class="btn" style="background:#ff3b30;" onclick="logout()">Cerrar Sesión</button>
+        </div>
+
+    </main>
+
+    <div class="fab-support" onclick="openSupport()"><i class="fas fa-headset"></i></div>
+
+    <nav>
+        <div class="nav-item active" onclick="nav('home', this)"><i class="fas fa-home"></i><span>Inicio</span></div>
+        <div class="nav-item" onclick="nav('map', this)"><i class="fas fa-map-marker-alt"></i><span>Mapa</span></div>
+        <div class="nav-item" onclick="nav('scan', this)"><i class="fas fa-qrcode"></i><span>Scan</span></div>
+        <div class="nav-item" onclick="nav('shop', this)"><i class="fas fa-shopping-bag"></i><span>Tienda</span></div>
+        <div class="nav-item" onclick="nav('profile', this)"><i class="fas fa-user-circle"></i><span>Perfil</span></div>
+    </nav>
+
     <script>
-        // --- NAVEGACIÓN ---
-        function switchTab(screenId, element) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.nav-icon').forEach(n => n.classList.remove('active'));
-            document.getElementById('screen-' + screenId).classList.add('active');
-            if(!element.classList.contains('settings-btn')) element.classList.add('active');
-            if(screenId === 'map') setTimeout(() => { map.invalidateSize(); }, 100);
+        let user = JSON.parse(localStorage.getItem('apn_user')) || null;
+        const sounds = { click: document.getElementById('snd-click'), success: document.getElementById('snd-success') };
+        const playSnd = (type) => { try { sounds[type].currentTime=0; sounds[type].play(); } catch(e){} };
+
+        window.onload = () => { 
+            window.addEventListener('offline', () => Swal.fire('Sin conexión', 'Modo offline activado', 'warning'));
+            if(user) { document.getElementById('login-overlay').style.display='none'; initApp(); } 
+        };
+
+        function login() {
+            const u = document.getElementById('login-user').value;
+            if(!u) return;
+            user = { name: u, xp: 0, level: 1, co2: 0, lastBonus: null };
+            localStorage.setItem('apn_user', JSON.stringify(user));
+            document.getElementById('login-overlay').style.display='none';
+            playSnd('success');
+            initApp();
         }
 
-        // --- MAPA GIPUZKOA (Puntos en Usurbil, Orio, Lasarte, Zumaia) ---
-        // Centrado en un punto medio
-        var map = L.map('map', {zoomControl: false}).setView([43.28, -2.15], 12);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+        function logout() { localStorage.removeItem('apn_user'); location.reload(); }
 
-        const stations = [
-            // USURBIL
-            { t: 'bench', lat: 43.2714, lng: -2.0433, b: 90, n: 'EKI Seat (Usurbil Centro)' },
-            { t: 'bike', lat: 43.2720, lng: -2.0440, b: 100, n: 'HIRI Go (Usurbil LH)' },
-            // ORIO
-            { t: 'table', lat: 43.2769, lng: -2.1292, b: 45, n: 'KALEA Work (Orio Puerto)' },
-            { t: 'bike', lat: 43.2780, lng: -2.1300, b: 12, n: 'HIRI Go (Orio Playa)' }, // Rojo
-            // LASARTE
-            { t: 'bench', lat: 43.2675, lng: -2.0203, b: 10, n: 'EKI Seat (Lasarte)' }, // Rojo
-            // ZUMAIA
-            { t: 'table', lat: 43.2983, lng: -2.2572, b: 60, n: 'KALEA Work (Zumaia Flysch)' },
-            // ZARAUTZ
-            { t: 'bike', lat: 43.2844, lng: -2.1722, b: 85, n: 'HIRI Go (Zarautz)' }
-        ];
+        function initApp() {
+            document.getElementById('welcome-txt').innerText = `Kaixo, ${user.name}!`;
+            checkBonus();
+            updateUI();
+            setTimeout(initMap, 500);
+        }
 
-        stations.forEach(st => {
-            let colorClass = '', statusMsg = '', icon = '';
-            // Lógica Semáforo
-            if(st.b < 15) {
-                colorClass = 'pin-red';
-                statusMsg = '<b style="color:red">⛔ SISTEMA BLOQUEADO</b><br>Carga Critica < 15%';
-            } else if (st.b <= 50) {
-                colorClass = 'pin-yellow';
-                statusMsg = '<b style="color:#f1c40f">⚠️ Batería Media</b><br>Rendimiento Limitado';
+        function checkBonus() {
+            const today = new Date().toDateString();
+            const btn = document.getElementById('btn-bonus');
+            if(user.lastBonus === today) { btn.innerText = "✅ Bonus Reclamado"; btn.style.opacity = "0.6"; btn.disabled = true; }
+        }
+
+        function claimBonus() {
+            user.xp += 20; user.lastBonus = new Date().toDateString();
+            saveUser(); playSnd('success'); fireConfetti(); checkBonus(); updateUI();
+            Swal.fire({icon:'success', title:'+20 XP', text:'¡Vuelve mañana!', timer:1500, showConfirmButton:false});
+        }
+
+        function updateUI() {
+            document.getElementById('val-xp').innerText = user.xp;
+            document.getElementById('shop-pts').innerText = user.xp;
+            document.getElementById('val-co2').innerText = user.co2.toFixed(1);
+            document.getElementById('header-lvl').innerText = "Lvl " + user.level;
+
+            // Arbol Evolutivo
+            const stages = ["https://cdn-icons-png.flaticon.com/512/740/740935.png", "https://cdn-icons-png.flaticon.com/512/427/427502.png", "https://cdn-icons-png.flaticon.com/512/2979/2979473.png", "https://cdn-icons-png.flaticon.com/512/622/622869.png", "https://cdn-icons-png.flaticon.com/512/2421/2421295.png"];
+            const names = ["Semilla", "Brote", "Árbol Joven", "Roble Fuerte", "Árbol Mágico"];
+            let idx = 0;
+            if(user.level >= 10) idx=1; if(user.level>=25) idx=2; if(user.level>=50) idx=3; if(user.level>=100) idx=4;
+            
+            document.getElementById('tree-img').src = stages[idx];
+            document.getElementById('tree-title').innerText = names[idx];
+            
+            let prog = user.xp % 100;
+            document.getElementById('xp-bar').style.width = prog + "%";
+            document.getElementById('xp-text').innerText = `${prog} / 100 XP`;
+
+            if(user.level >= 5) unlock('item-netflix');
+            if(user.level >= 10) unlock('item-zara');
+            if(user.level >= 20) unlock('item-nike');
+            if(user.level >= 50) unlock('item-apple');
+            if(user.level >= 50) unlock('item-ps5');
+            if(user.level >= 100) unlock('item-tesla');
+        }
+
+        function unlock(id) {
+            const el = document.getElementById(id);
+            if(el) { el.classList.remove('locked'); el.querySelector('.lock-badge').style.display = 'none'; }
+        }
+
+        function showImpact() {
+            playSnd('click');
+            const phones = Math.floor(user.co2 * 50);
+            Swal.fire({title: '🌍 Tu Impacto', html: `Has ahorrado <b>${user.co2.toFixed(1)} kg</b> de CO2.<br>¡Equivale a cargar <b>${phones} móviles</b>!`, icon: 'info'});
+        }
+
+        function simulateScan() {
+            playSnd('click');
+            Swal.fire({title:'Conectando...', timer:1500, didOpen:()=>Swal.showLoading()}).then(()=>{
+                user.xp += 50; user.co2 += 2.5;
+                if(user.xp >= user.level * 100) { user.level++; Swal.fire('¡NIVEL SUBIDO!', '', 'success'); fireConfetti(); }
+                else { playSnd('success'); Swal.fire('¡Éxito!', '+50 XP', 'success'); }
+                saveUser(); updateUI(); nav('home', document.querySelector('.nav-item'));
+            });
+        }
+
+        function redeem(item) {
+            playSnd('click');
+            if(item.includes('Sorteo') || item.includes('iPhone') || item.includes('PS5') || item.includes('Tesla')) {
+                if(user.xp<100) return Swal.fire('Error', 'Faltan puntos para el ticket (100XP)', 'error');
+                user.xp-=100; saveUser(); updateUI(); fireConfetti(); Swal.fire('¡Apuntado!', 'Ticket registrado para el sorteo', 'success');
             } else {
-                colorClass = 'pin-green';
-                statusMsg = '<b style="color:green">✅ Disponible</b><br>Rendimiento Óptimo';
+                if(user.xp<200) return Swal.fire('Error', 'Faltan puntos (min 200XP)', 'error');
+                Swal.fire('Canjeado', 'Código: APN-2025-' + Math.floor(Math.random()*999), 'success');
             }
+        }
 
-            if(st.t == 'bench') icon = 'fa-chair';
-            if(st.t == 'table') icon = 'fa-umbrella-beach';
-            if(st.t == 'bike') icon = 'fa-bicycle';
-
-            L.marker([st.lat, st.lng], {
-                icon: L.divIcon({
-                    className: 'c',
-                    html: `<div class='custom-pin ${colorClass}'><i class='fas ${icon}'></i></div>`,
-                    iconSize: [40,40]
-                })
-            }).addTo(map).bindPopup(`<b>${st.n}</b><br>🔋 Bateria: ${st.b}%<br>${statusMsg}`);
-        });
-
-        // --- FUNCIONES GENERALES ---
-        function doLogin() { document.getElementById('login-wrapper').classList.remove('active'); document.getElementById('profile-wrapper').classList.add('active'); document.getElementById('header-title').innerText = "Kaixo, Markel!"; }
-        function doLogout() { document.getElementById('login-wrapper').classList.add('active'); document.getElementById('profile-wrapper').classList.remove('active'); document.getElementById('header-title').innerText = "Ongi etorri!"; switchTab('home', document.getElementById('nav-home')); }
+        function report() {
+            playSnd('click');
+            Swal.fire({title:'Reportar', input:'select', inputOptions:{'roto':'Roto','sucio':'Sucio'}, showCancelButton:true}).then((r)=>{
+                if(r.isConfirmed) Swal.fire('Enviado','Gracias','success');
+            });
+        }
         
-        let isDark=false; function toggleDarkMode(){ isDark=!isDark; document.getElementById('mainFrame').classList.toggle('dark',isDark); document.body.classList.toggle('dark-mode',isDark); document.getElementById('darkModeIcon').className=isDark?'fas fa-toggle-on':'fas fa-toggle-off'; }
+        function openSupport() {
+            playSnd('click');
+            Swal.fire({title:'Soporte', input:'textarea', inputPlaceholder:'Escribe tu duda...', confirmButtonText:'Enviar'}).then((r)=>{
+                if(r.isConfirmed) Swal.fire('Recibido', 'Te contestaremos pronto', 'success');
+            });
+        }
         
-        let isW=false; function connectWifi(){ isW=!isW; const b=document.getElementById('wifiBtn'); const t=document.getElementById('txt-connect'); if(isW){b.classList.add('connecting');setTimeout(()=>{b.classList.remove('connecting');b.classList.add('connected');t.innerText="Konektatuta";t.style.color="white";},2000);}else{b.classList.remove('connected');t.innerText="Konektatu";t.style.color="var(--dark)";} }
-        
-        // BICI: VERDE (ABRIR) -> ROJO (CERRAR)
-        let isB=false,tI; function toggleBikeLock(){ isB=!isB; document.getElementById('bikeWrapper').className=isB?'bike-wrapper bike-unlocked':'bike-wrapper bike-locked'; document.getElementById('lockIcon').className=isB?'fas fa-lock-open lock-icon':'fas fa-lock lock-icon'; document.getElementById('txt-bike-status').innerText=isB?'Desblokeatuta!':'Blokeatuta'; document.getElementById('bikeBtn').className=isB?'action-btn btn-red':'action-btn btn-green'; document.getElementById('txt-bike-btn').innerText=isB?'Itzuli (Blokeatu)':'Desblokeatu'; if(isB)startTimer();else stopTimer(); }
-        function startTimer(){let s=0;document.getElementById('usageTimer').innerText="00:00:00";tI=setInterval(()=>{s++;document.getElementById('usageTimer').innerText=new Date(s*1000).toISOString().substr(11,8);},1000);}
-        function stopTimer(){clearInterval(tI);document.getElementById('usageTimer').innerText="00:00:00";}
+        function showNotif() {
+            playSnd('click');
+            Swal.fire({title:'Notificaciones', html:'<p>🔥 <b>Promo:</b> Doble XP hoy</p><p>🏆 <b>Ranking:</b> Has subido al puesto #12</p>'});
+        }
 
-        let currentLang = 'eu';
-        function setAppLang(lang, element) {
-            currentLang = lang;
-            document.querySelectorAll('.lang-opt').forEach(el => el.classList.remove('active')); element.classList.add('active');
+        function nav(id, el) {
+            playSnd('click');
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById('view-'+id).classList.add('active');
+            if(el) { document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); el.classList.add('active'); }
+            if(id === 'map') setTimeout(()=>map.invalidateSize(), 200);
+        }
+
+        function saveUser() { localStorage.setItem('apn_user', JSON.stringify(user)); }
+        function toggleDark() { document.body.classList.toggle('dark-mode'); }
+        function changeLang(l) { Swal.fire('Idioma', 'Cambiado a ' + l, 'info'); }
+        function fireConfetti() { confetti({particleCount: 100, spread: 70, origin: { y: 0.6 }}); }
+
+        let map;
+        function initMap() {
+            if(map) return;
+            map = L.map('map', {zoomControl: false}).setView([43.318, -1.981], 12);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png').addTo(map);
+            const locs = [{lat:43.318,lng:-1.981},{lat:43.284,lng:-2.172},{lat:43.337,lng:-1.788}];
+            locs.forEach(l => {
+                L.marker([l.lat, l.lng], {icon: L.divIcon({className:'x', html:'<div style="background:#00e676;width:15px;height:15px;border-radius:50%;border:2px solid white;box-shadow:0 2px 5px rgba(0,0,0,0.3)"></div>'})}).addTo(map);
+            });
         }
     </script>
 </body>
