@@ -46,14 +46,14 @@
 
         /* MAIN SCROLLABLE AREA */
         main {
-            flex-grow: 1; overflow-y: auto; overflow-x: hidden; padding: 20px; padding-bottom: 90px; /* Espacio extra abajo */
+            flex-grow: 1; overflow-y: auto; overflow-x: hidden; padding: 20px; padding-bottom: 90px;
             scroll-behavior: smooth; position: relative; z-index: 1;
         }
         main::-webkit-scrollbar { display: none; }
 
-        /* NAVBAR FIJA (ARREGLADA) */
+        /* NAVBAR FIJA */
         nav {
-            height: 80px; width: 100%; z-index: 2000; /* Z-Index alto para estar encima de todo */
+            height: 80px; width: 100%; z-index: 2000;
             background: var(--surface); border-top: 1px solid rgba(0,0,0,0.05);
             display: flex; justify-content: space-around; align-items: flex-start; padding-top: 12px;
             padding-bottom: env(safe-area-inset-bottom);
@@ -90,7 +90,7 @@
         .stat-box { background: var(--surface); padding: 20px; border-radius: 24px; text-align: center; box-shadow: var(--shadow); cursor: pointer; }
         .stat-num { font-size: 1.6rem; font-weight: 900; color: var(--text); margin-top: 5px; }
 
-        /* WIDGET CLIMA SOLAR */
+        /* WIDGET CLIMA */
         .weather-widget { background: linear-gradient(135deg, #FF9800, #FF5722); color: white; display: flex; justify-content: space-between; align-items: center; }
         
         /* RANKING */
@@ -122,16 +122,14 @@
         .bar-fill { background: var(--primary); position: absolute; bottom: 0; width: 100%; border-radius: 5px; transition: height 1s; }
         .bar-label { font-size: 0.6rem; color: var(--gray); margin-top: 5px; text-align: center; }
 
-        /* EXTRA UI */
+        /* UI EXTRAS */
         .fab-support { position: fixed; bottom: 100px; right: 20px; width: 50px; height: 50px; background: var(--accent); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 20px rgba(41,121,255,0.4); z-index: 100; cursor: pointer; }
         .fab-report { position: absolute; bottom: 20px; right: 20px; width: 50px; height: 50px; background: #ff3b30; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 15px rgba(255, 59, 48, 0.4); z-index: 500; font-size: 1.2rem; cursor: pointer; }
         
-        /* OFFLINE & LOGIN */
         #offline-alert { display: none; background: #ff3b30; color: white; text-align: center; padding: 5px; font-size: 0.8rem; font-weight: bold; position: fixed; top: 0; width: 100%; z-index: 2000; }
         #login-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: var(--bg); z-index: 9999; display: flex; flex-direction: column; justify-content: center; padding: 30px; text-align: center; }
         .input-glass { background: var(--surface); border: none; padding: 18px; border-radius: 15px; margin-bottom: 15px; width: 100%; font-size: 1rem; outline: none; color: var(--text); box-shadow: inset 0 2px 5px rgba(0,0,0,0.05); }
 
-        /* MAPA */
         #map { height: 100%; width: 100%; }
         .map-wrapper { height: 60vh; border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); position: relative; }
 
@@ -170,20 +168,20 @@
             <div class="card welcome-hero">
                 <div>
                     <h2 id="welcome-txt" style="margin:0;">Kaixo!</h2>
-                    <p style="margin:5px 0 0 0; opacity:0.8;">Tu energía mueve la ciudad.</p>
+                    <p style="margin:5px 0 0 0; opacity:0.8;" data-i18n="hero_sub">Tu energía mueve la ciudad.</p>
                 </div>
                 <div style="font-size:2.5rem;">🌱</div>
             </div>
 
-            <button id="btn-bonus" class="btn" style="background: linear-gradient(135deg, #FFC107, #FF9800); margin-bottom: 20px; margin-top:0;" onclick="claimBonus()">
+            <button id="btn-bonus" class="btn" style="background: linear-gradient(135deg, #FFC107, #FF9800); margin-bottom: 20px; margin-top:0;" onclick="claimBonus()" data-i18n="bonus_btn">
                 🎁 Bonus Diario (+20 XP)
             </button>
 
             <div class="card weather-widget">
                 <div>
-                    <div style="font-weight:bold; font-size:0.8rem; opacity:0.9;">GIPUZKOA SOLAR</div>
+                    <div style="font-weight:bold; font-size:0.8rem; opacity:0.9;" data-i18n="solar_title">GIPUZKOA SOLAR</div>
                     <div style="font-size:1.8rem; font-weight:800;">☀ 24°C</div>
-                    <div style="font-size:0.8rem;">Eficiencia Carga: 100%</div>
+                    <div style="font-size:0.8rem;" data-i18n="efficiency">Eficiencia: 100%</div>
                 </div>
                 <i class="fas fa-plug" style="font-size:2.5rem; opacity:0.8;"></i>
             </div>
@@ -192,7 +190,7 @@
                 <div class="stat-box" onclick="showImpact()">
                     <i class="fas fa-leaf" style="color:var(--primary); font-size:1.5rem;"></i>
                     <div class="stat-num" id="val-co2">0</div>
-                    <div style="font-size:0.7rem; color:var(--gray); font-weight:bold;">KG CO2 (Info)</div>
+                    <div style="font-size:0.7rem; color:var(--gray); font-weight:bold;" data-i18n="co2_label">KG CO2 (Info)</div>
                 </div>
                 <div class="stat-box">
                     <i class="fas fa-bolt" style="color:#ffb300; font-size:1.5rem;"></i>
@@ -201,7 +199,7 @@
                 </div>
             </div>
 
-            <h3 style="margin: 25px 0 10px 0; color:var(--text);">Top Ecos Gipuzkoa 🏆</h3>
+            <h3 style="margin: 25px 0 10px 0; color:var(--text);" data-i18n="rank_title">Top Ecos Gipuzkoa 🏆</h3>
             <div class="card" style="padding:10px 20px;">
                 <div class="rank-row">
                     <div class="rank-num rank-1">1</div>
@@ -222,12 +220,12 @@
         </div>
 
         <div id="view-map" class="view">
-            <h2 style="margin-bottom:15px; color:var(--text);">Mapa en Vivo</h2>
+            <h2 style="margin-bottom:15px; color:var(--text);" data-i18n="map_title">Mapa en Vivo</h2>
             <div class="map-wrapper">
                 <div id="map"></div>
                 <div class="fab-report" onclick="report()"><i class="fas fa-wrench"></i></div>
             </div>
-            <p style="text-align:center; font-size:0.8rem; color:var(--gray); margin-top:10px;">🟢 Disponible | 🟠 Ocupado | 🔴 Avería</p>
+            <p style="text-align:center; font-size:0.8rem; color:var(--gray); margin-top:10px;" data-i18n="map_legend">🟢 Disponible | 🟠 Ocupado | 🔴 Avería</p>
         </div>
 
         <div id="view-scan" class="view">
@@ -236,16 +234,16 @@
                 <div style="position:absolute; width:80%; height:2px; background:var(--primary); box-shadow:0 0 20px var(--primary); animation:scan 2s infinite ease-in-out;"></div>
                 <style>@keyframes scan { 0%,100%{top:20%} 50%{top:80%} }</style>
             </div>
-            <button class="btn" onclick="simulateScan()"><i class="fas fa-camera"></i> Escanear (+50 XP)</button>
+            <button class="btn" onclick="simulateScan()"><i class="fas fa-camera"></i> <span data-i18n="btn_scan_long">Escanear (+50 XP)</span></button>
         </div>
 
         <div id="view-shop" class="view">
             <div class="card" style="background:linear-gradient(135deg, #FFC107, #FF9800); color:black; display:flex; justify-content:space-between; align-items:center;">
-                <div><h1 style="margin:0; font-size:2.2rem;" id="shop-pts">0</h1><small style="font-weight:bold;">TUS PUNTOS</small></div>
+                <div><h1 style="margin:0; font-size:2.2rem;" id="shop-pts">0</h1><small style="font-weight:bold;" data-i18n="your_pts">TUS PUNTOS</small></div>
                 <i class="fas fa-gift" style="font-size:3rem; opacity:0.3;"></i>
             </div>
             
-            <h3 style="margin-bottom:15px; color:var(--text);">Canjear Premios</h3>
+            <h3 style="margin-bottom:15px; color:var(--text);" data-i18n="shop_title">Canjear Premios</h3>
             <div class="shop-grid">
                 <div class="product-card" onclick="redeem('Mugi')">
                     <div class="product-img"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS1GEaLx8SKGsJ8N00MMxTCaaX27B273yB2wA&s" style="width:100%; height:100%; object-fit:contain;"></div>
@@ -289,18 +287,18 @@
         </div>
 
         <div id="view-profile" class="view">
-            <h2 style="margin-bottom:15px; color:var(--text);">Mi Evolución</h2>
+            <h2 style="margin-bottom:15px; color:var(--text);" data-i18n="profile_title">Mi Evolución</h2>
             
             <div class="card" style="text-align:center; padding:30px 20px; background: linear-gradient(to bottom, #e0f7fa, #ffffff);">
                 <h3 id="tree-title" style="color:var(--primary-dark); margin-bottom:5px;">Semilla</h3>
-                <p style="color:var(--gray); font-size:0.8rem; margin-bottom:30px;">Tu progreso sostenible</p>
+                <p style="color:var(--gray); font-size:0.8rem; margin-bottom:30px;" data-i18n="tree_sub">Tu progreso sostenible</p>
                 <img id="tree-img" src="" class="tree-stage">
                 <div style="background:#eee; height:8px; border-radius:10px; margin-top:20px; overflow:hidden;"><div id="xp-bar" style="height:100%; background:var(--primary); width:0%;"></div></div>
                 <p style="font-weight:bold; color:var(--text); margin-top:5px;" id="xp-text">0 / 100 XP</p>
             </div>
 
             <div class="card">
-                <h3 style="margin:0 0 15px 0; font-size:1rem;">Actividad Semanal</h3>
+                <h3 style="margin:0 0 15px 0; font-size:1rem;" data-i18n="weekly_title">Actividad Semanal</h3>
                 <div class="chart-container">
                     <div class="bar-group"><div class="bar"><div class="bar-fill" style="height:30%;"></div></div><span class="bar-label">L</span></div>
                     <div class="bar-group"><div class="bar"><div class="bar-fill" style="height:50%;"></div></div><span class="bar-label">M</span></div>
@@ -314,17 +312,17 @@
 
             <div class="card">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                    <span>Idioma</span>
-                    <select onchange="changeLang(this.value)" style="border:none; background:var(--bg); padding:5px; border-radius:5px;">
+                    <span data-i18n="lang_opt">Idioma</span>
+                    <select id="lang-select" onchange="changeLang(this.value)" style="border:none; background:var(--bg); padding:5px; border-radius:5px;">
                         <option value="es">Español</option><option value="eu">Euskara</option><option value="en">English</option>
                     </select>
                 </div>
                 <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <span>Modo Oscuro</span>
+                    <span data-i18n="dark_opt">Modo Oscuro</span>
                     <input type="checkbox" onchange="toggleDark()">
                 </div>
             </div>
-            <button class="btn" style="background:#ff3b30;" onclick="logout()">Cerrar Sesión</button>
+            <button class="btn" style="background:#ff3b30;" onclick="logout()" data-i18n="logout_btn">Cerrar Sesión</button>
         </div>
 
     </main>
@@ -332,17 +330,49 @@
     <div class="fab-support" onclick="openSupport()"><i class="fas fa-headset"></i></div>
 
     <nav>
-        <div class="nav-item active" onclick="nav('home', this)"><i class="fas fa-home"></i><span>Inicio</span></div>
-        <div class="nav-item" onclick="nav('map', this)"><i class="fas fa-map-marker-alt"></i><span>Mapa</span></div>
-        <div class="nav-item" onclick="nav('scan', this)"><i class="fas fa-qrcode"></i><span>Scan</span></div>
-        <div class="nav-item" onclick="nav('shop', this)"><i class="fas fa-shopping-bag"></i><span>Tienda</span></div>
-        <div class="nav-item" onclick="nav('profile', this)"><i class="fas fa-user-circle"></i><span>Perfil</span></div>
+        <div class="nav-item active" onclick="nav('home', this)"><i class="fas fa-home"></i><span data-i18n="nav_home">Inicio</span></div>
+        <div class="nav-item" onclick="nav('map', this)"><i class="fas fa-map-marker-alt"></i><span data-i18n="nav_map">Mapa</span></div>
+        <div class="nav-item" onclick="nav('scan', this)"><i class="fas fa-qrcode"></i><span data-i18n="nav_scan">Scan</span></div>
+        <div class="nav-item" onclick="nav('shop', this)"><i class="fas fa-shopping-bag"></i><span data-i18n="nav_shop">Tienda</span></div>
+        <div class="nav-item" onclick="nav('profile', this)"><i class="fas fa-user-circle"></i><span data-i18n="nav_profile">Perfil</span></div>
     </nav>
 
     <script>
         let user = JSON.parse(localStorage.getItem('apn_user')) || null;
+        let lang = localStorage.getItem('apn_lang') || 'es';
         const sounds = { click: document.getElementById('snd-click'), success: document.getElementById('snd-success') };
         const playSnd = (type) => { try { sounds[type].currentTime=0; sounds[type].play(); } catch(e){} };
+
+        // --- DICCIONARIO DE IDIOMAS ---
+        const i18n = {
+            es: {
+                hero_sub: "Tu energía mueve la ciudad.", bonus_btn: "🎁 Bonus Diario (+20 XP)", solar_title: "GIPUZKOA SOLAR", efficiency: "Eficiencia: 100%", co2_label: "KG CO2 (Info)", rank_title: "Top Ecos Gipuzkoa 🏆",
+                map_title: "Mapa en Vivo", map_legend: "🟢 Disponible | 🟠 Ocupado | 🔴 Avería", btn_scan_long: "Escanear (+50 XP)",
+                your_pts: "TUS PUNTOS", shop_title: "Canjear Premios",
+                profile_title: "Mi Evolución", tree_sub: "Tu progreso sostenible", weekly_title: "Actividad Semanal", lang_opt: "Idioma", dark_opt: "Modo Oscuro", logout_btn: "Cerrar Sesión",
+                nav_home: "Inicio", nav_map: "Mapa", nav_scan: "Scan", nav_shop: "Tienda", nav_profile: "Perfil",
+                tree_names: ["Semilla", "Brote", "Árbol Joven", "Roble Fuerte", "Árbol Mágico"],
+                bonus_claimed: "✅ Bonus Reclamado"
+            },
+            eu: {
+                hero_sub: "Zure energiak hiria mugitzen du.", bonus_btn: "🎁 Eguneko Bonusa (+20 XP)", solar_title: "GIPUZKOA EGUZKI", efficiency: "Eraginkortasuna: %100", co2_label: "KG CO2 (Info)", rank_title: "Gipuzkoako Top Eko 🏆",
+                map_title: "Mapa Bizia", map_legend: "🟢 Libre | 🟠 Okupatuta | 🔴 Matxuratuta", btn_scan_long: "Eskaneatu (+50 XP)",
+                your_pts: "ZURE PUNTUAK", shop_title: "Sariak Trukatu",
+                profile_title: "Nire Eboluzioa", tree_sub: "Zure aurrerapen jasangarria", weekly_title: "Asteko Jarduera", lang_opt: "Hizkuntza", dark_opt: "Modu Iluna", logout_btn: "Saioa Itxi",
+                nav_home: "Hasiera", nav_map: "Mapa", nav_scan: "Eskaneatu", nav_shop: "Denda", nav_profile: "Profila",
+                tree_names: ["Hazia", "Kimua", "Zuhaitz Gaztea", "Haritz Indartsua", "Zuhaitz Magikoa"],
+                bonus_claimed: "✅ Bonusa Hartuta"
+            },
+            en: {
+                hero_sub: "Your energy moves the city.", bonus_btn: "🎁 Daily Bonus (+20 XP)", solar_title: "GIPUZKOA SOLAR", efficiency: "Efficiency: 100%", co2_label: "KG CO2 (Info)", rank_title: "Top Eco Gipuzkoa 🏆",
+                map_title: "Live Map", map_legend: "🟢 Available | 🟠 Busy | 🔴 Broken", btn_scan_long: "Scan (+50 XP)",
+                your_pts: "YOUR POINTS", shop_title: "Redeem Rewards",
+                profile_title: "My Evolution", tree_sub: "Your sustainable progress", weekly_title: "Weekly Activity", lang_opt: "Language", dark_opt: "Dark Mode", logout_btn: "Logout",
+                nav_home: "Home", nav_map: "Map", nav_scan: "Scan", nav_shop: "Shop", nav_profile: "Profile",
+                tree_names: ["Seed", "Sprout", "Sapling", "Strong Oak", "Magic Tree"],
+                bonus_claimed: "✅ Bonus Claimed"
+            }
+        };
 
         window.onload = () => { 
             window.addEventListener('offline', () => Swal.fire('Sin conexión', 'Modo offline activado', 'warning'));
@@ -362,7 +392,9 @@
         function logout() { localStorage.removeItem('apn_user'); location.reload(); }
 
         function initApp() {
-            document.getElementById('welcome-txt').innerText = `Kaixo, ${user.name}!`;
+            document.getElementById('welcome-txt').innerText = lang === 'eu' ? `Kaixo, ${user.name}!` : (lang === 'en' ? `Hello, ${user.name}!` : `Hola, ${user.name}!`);
+            document.getElementById('lang-select').value = lang;
+            updateTexts(); // Aplicar idioma guardado
             checkBonus();
             updateUI();
             setTimeout(initMap, 500);
@@ -371,7 +403,15 @@
         function checkBonus() {
             const today = new Date().toDateString();
             const btn = document.getElementById('btn-bonus');
-            if(user.lastBonus === today) { btn.innerText = "✅ Bonus Reclamado"; btn.style.opacity = "0.6"; btn.disabled = true; }
+            if(user.lastBonus === today) { 
+                btn.innerText = i18n[lang].bonus_claimed; 
+                btn.style.opacity = "0.6"; 
+                btn.disabled = true; 
+            } else {
+                btn.innerText = i18n[lang].bonus_btn;
+                btn.style.opacity = "1";
+                btn.disabled = false;
+            }
         }
 
         function claimBonus() {
@@ -388,12 +428,13 @@
 
             // Arbol Evolutivo
             const stages = ["https://cdn-icons-png.flaticon.com/512/740/740935.png", "https://cdn-icons-png.flaticon.com/512/427/427502.png", "https://cdn-icons-png.flaticon.com/512/2979/2979473.png", "https://cdn-icons-png.flaticon.com/512/622/622869.png", "https://cdn-icons-png.flaticon.com/512/2421/2421295.png"];
-            const names = ["Semilla", "Brote", "Árbol Joven", "Roble Fuerte", "Árbol Mágico"];
+            
             let idx = 0;
             if(user.level >= 10) idx=1; if(user.level>=25) idx=2; if(user.level>=50) idx=3; if(user.level>=100) idx=4;
             
             document.getElementById('tree-img').src = stages[idx];
-            document.getElementById('tree-title').innerText = names[idx];
+            // Usar nombres traducidos
+            document.getElementById('tree-title').innerText = i18n[lang].tree_names[idx];
             
             let prog = user.xp % 100;
             document.getElementById('xp-bar').style.width = prog + "%";
@@ -410,6 +451,23 @@
         function unlock(id) {
             const el = document.getElementById(id);
             if(el) { el.classList.remove('locked'); el.querySelector('.lock-badge').style.display = 'none'; }
+        }
+
+        function changeLang(l) {
+            lang = l;
+            localStorage.setItem('apn_lang', l);
+            updateTexts();
+            updateUI(); // Para actualizar nombres del árbol
+            checkBonus(); // Para actualizar texto botón bonus
+            document.getElementById('welcome-txt').innerText = lang === 'eu' ? `Kaixo, ${user.name}!` : (lang === 'en' ? `Hello, ${user.name}!` : `Hola, ${user.name}!`);
+        }
+
+        function updateTexts() {
+            const t = i18n[lang];
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if(t[key]) el.innerText = t[key];
+            });
         }
 
         function showImpact() {
@@ -468,7 +526,6 @@
 
         function saveUser() { localStorage.setItem('apn_user', JSON.stringify(user)); }
         function toggleDark() { document.body.classList.toggle('dark-mode'); }
-        function changeLang(l) { Swal.fire('Idioma', 'Cambiado a ' + l, 'info'); }
         function fireConfetti() { confetti({particleCount: 100, spread: 70, origin: { y: 0.6 }}); }
 
         let map;
